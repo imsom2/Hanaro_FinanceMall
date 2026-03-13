@@ -25,7 +25,7 @@ public class Account extends BaseEntity {
 	private User user;
 
 	@Column(nullable = false, unique = true)
-	private String accountNum;  // 계좌번호
+	private String accountNum;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
