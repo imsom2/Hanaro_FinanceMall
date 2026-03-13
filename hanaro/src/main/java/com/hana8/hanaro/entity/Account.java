@@ -32,7 +32,7 @@ public class Account extends BaseEntity {
 	private AccountType accountType;
 
 	@Column(nullable = false)
-	private Long balance = 0L;  // 잔액
+	private Long balance = 0L;
 
 	// 편의 메서드
 	public void deposit(Long amount) {
