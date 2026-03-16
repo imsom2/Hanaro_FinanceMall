@@ -22,12 +22,12 @@ VALUES
     ('(종료) 하나 특별 적금', 'SAVINGS',  50000,    500000,  6, 5.00, 2.00, '종료된 상품입니다.', true);
 
 -- ── 3. PRODUCT_IMAGE ─────────────────────────────────────────────
-INSERT INTO ProductImage (product, orgName, saveName, saveDir, sortOrder)
+INSERT INTO ProductImage (product, orgName, saveName, saveDir)
 VALUES
-    (1, 'deposit_main.jpg',   '20260314_deposit_main.jpg',   '2026/03/14', 1),
-    (1, 'deposit_detail.jpg', '20260314_deposit_detail.jpg', '2026/03/14', 2),
-    (2, 'savings_main.jpg',   '20260314_savings_main.jpg',   '2026/03/14', 1),
-    (2, 'savings_detail.jpg', '20260314_savings_detail.jpg', '2026/03/14', 2);
+    (1, 'deposit_main.jpg',   '20260314_deposit_main.jpg',   '2026/03/14'),
+    (1, 'deposit_detail.jpg', '20260314_deposit_detail.jpg', '2026/03/14'),
+    (2, 'savings_main.jpg',   '20260314_savings_main.jpg',   '2026/03/14'),
+    (2, 'savings_detail.jpg', '20260314_savings_detail.jpg', '2026/03/14');
 
 -- ── 4. ACCOUNT ───────────────────────────────────────────────────
 INSERT INTO Account (user, accountNum, accountType, balance)

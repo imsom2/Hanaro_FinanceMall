@@ -1,6 +1,7 @@
 package com.hana8.hanaro.controller;
 
 import com.hana8.hanaro.dto.ProductDTO;
+import com.hana8.hanaro.dto.ProductListDTO;
 import com.hana8.hanaro.service.ProductImageService;
 import com.hana8.hanaro.service.ProductService;
 
@@ -23,8 +24,7 @@ public class ProductController {
 	private final ProductImageService productImageService;
 
 	@GetMapping
-	// todo : 상품 목록과 상품 상세의 차이점 두기
-	public List<ProductDTO> getProducts() {
+	public List<ProductListDTO> getProducts() {
 		return service.getProducts();
 	}
 

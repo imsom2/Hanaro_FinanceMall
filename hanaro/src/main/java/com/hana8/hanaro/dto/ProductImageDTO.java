@@ -12,5 +12,4 @@ public class ProductImageDTO {
 	private String orgName;
 	private String saveName;
 	private String saveDir;
-	private Integer sortOrder;
 }

@@ -74,11 +74,13 @@ public class FileService {
 			throw new NoSuchElementException("파일을 찾을 수 없습니다: " + saveName);
 		}
 
-		String contentType;
+		String contentType = "application/octet-stream";
 		try {
-			contentType = Files.probeContentType(filePath);
-		} catch (IOException e) {
-			contentType = "application/octet-stream";
+			String probed = Files.probeContentType(filePath);
+			if (probed != null && !probed.isBlank()) {
+				contentType = probed;
+			}
+		} catch(IOException ignored){
 		}
 
 		String disposition = (inline ? "inline" : "attachment")

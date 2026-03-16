@@ -21,10 +21,10 @@ public class ProductImageController {
 	// 이미지 등록
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public List<ProductImageDTO> uploadImages(
-		@PathVariable Long id,
+		@PathVariable Long productId,
 		@RequestPart("files") List<MultipartFile> files
 	) {
-		return productImageService.uploadImages(id, files);
+		return productImageService.uploadImages(productId, files);
 	}
 
 	// 이미지 다운로드

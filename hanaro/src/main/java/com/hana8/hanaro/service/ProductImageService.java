@@ -11,20 +11,29 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProductImageService {
 
-	private static final long MAX_FILE_SIZE = 2L * 1024 * 1024;   // 2MB
-	private static final long MAX_TOTAL_SIZE = 10L * 1024 * 1024; // 10MB
+	private static final long MAX_FILE_SIZE = 2L * 1024 * 1024;
+	private static final long MAX_TOTAL_SIZE = 10L * 1024 * 1024;
+	private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+		"image/jpeg", "image/png", "image/gif", "image/webp"
+	);
 
 	private final ProductRepository productRepository;
 	private final ProductImageRepository productImageRepository;
@@ -40,21 +49,27 @@ public class ProductImageService {
 
 		String todayPath = getTodayPath();
 		List<ProductImage> savedImages = new ArrayList<>();
+		List<String> uploadedFileNames = new ArrayList<>();
 
-		int sortOrder = productImageRepository.countByProductId(productId) + 1;
+		try {
+			for (MultipartFile file : files) {
+				String saveName = fileService.upload(file, todayPath);
+				uploadedFileNames.add(saveName);
 
-		for (MultipartFile file : files) {
-			String saveName = fileService.upload(file, todayPath);
+				ProductImage image = ProductImage.builder()
+					.product(product)
+					.orgName(file.getOriginalFilename())
+					.saveName(saveName)
+					.saveDir(todayPath)
+					.build();
 
-			ProductImage image = ProductImage.builder()
-				.product(product)
-				.orgName(file.getOriginalFilename())
-				.saveName(saveName)
-				.saveDir(todayPath)
-				.sortOrder(sortOrder++)
-				.build();
-
-			savedImages.add(productImageRepository.save(image));
+				savedImages.add(productImageRepository.save(image));
+			}
+		} catch (Exception e) {
+			for (String saveName : uploadedFileNames) {
+				fileService.delete(saveName, todayPath);
+			}
+			throw e;
 		}
 
 		return productMapper.toImageDTOList(savedImages);
@@ -76,13 +91,26 @@ public class ProductImageService {
 
 		validateProductOwnership(productId, image);
 
-		fileService.delete(image.getSaveName(), image.getSaveDir());
+		String saveName = image.getSaveName();
+		String saveDir = image.getSaveDir();
+
+		// ✅ DB 먼저 삭제 후, 트랜잭션 커밋 이후에 파일 삭제 (정합성 보장)
 		productImageRepository.delete(image);
+
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				fileService.delete(saveName, saveDir);
+			}
+		});
 	}
 
 	private void validateProductOwnership(Long productId, ProductImage image) {
 		if (!image.getProduct().getId().equals(productId)) {
 			throw new IllegalArgumentException("해당 상품의 이미지가 아닙니다.");
+		}
+		if (image.getProduct().isDeleted()) {
+			throw new IllegalArgumentException("삭제된 상품의 이미지에는 접근할 수 없습니다.");
 		}
 	}
 
@@ -96,6 +124,23 @@ public class ProductImageService {
 		for (MultipartFile file : files) {
 			if (file == null || file.isEmpty()) {
 				throw new IllegalArgumentException("비어 있는 파일은 업로드할 수 없습니다.");
+			}
+
+			String contentType = file.getContentType();
+			if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+				throw new IllegalArgumentException(
+					"지원하지 않는 파일 형식입니다. (jpeg, png, gif, webp만 허용): " + file.getOriginalFilename());
+			}
+
+			try {
+				BufferedImage img = ImageIO.read(file.getInputStream());
+				if (img == null) {
+					throw new IllegalArgumentException(
+						"유효하지 않은 이미지 파일입니다: " + file.getOriginalFilename());
+				}
+			} catch (IOException e) {
+				throw new IllegalArgumentException(
+					"이미지 파일을 읽을 수 없습니다: " + file.getOriginalFilename());
 			}
 
 			if (file.getSize() > MAX_FILE_SIZE) {

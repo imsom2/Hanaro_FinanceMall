@@ -38,7 +38,7 @@ public class SwaggerConfig {
 	private Info getInfo() {
 		return new Info()
 			.version("0.1.0")
-			.title("SpringDemo APIs")
+			.title("Finance Mall")
 			.description("Finance Mall API Documents")
 			.contact(new Contact().name("BE Team").email("hana8@hanabank.com"))
 			.license(new License().name("Apache 2.0"));

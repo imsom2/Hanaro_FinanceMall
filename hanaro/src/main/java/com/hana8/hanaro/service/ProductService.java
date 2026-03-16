@@ -1,6 +1,7 @@
 package com.hana8.hanaro.service;
 
 import com.hana8.hanaro.dto.ProductDTO;
+import com.hana8.hanaro.dto.ProductListDTO;
 import com.hana8.hanaro.entity.Product;
 import com.hana8.hanaro.repository.ProductRepository;
 import com.hana8.hanaro.mapper.ProductMapper;
@@ -17,10 +18,16 @@ public class ProductService {
 	private final ProductMapper mapper;
 
 	// 상품 목록 조회
-	public List<ProductDTO> getProducts() {
-		return repository.findByDeletedFalse()
-			.stream()
-			.map(mapper::toDTO)
+	public List<ProductListDTO> getProducts() {
+		List<Product> products = repository.findByDeletedFalse();
+		return products.stream()
+			.map(product -> {
+				ProductListDTO dto = mapper.toListDTO(product);
+				product.getImages().stream()
+					.findFirst()
+					.ifPresent(img -> dto.setThumbImage(mapper.toImageDTO(img)));
+				return dto;
+			})
 			.toList();
 	}
 
