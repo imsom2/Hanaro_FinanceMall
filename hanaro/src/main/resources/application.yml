@@ -9,12 +9,11 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-
     show-sql: true
-    defer-datasource-initialization: false
+    defer-datasource-initialization: true
 
     properties:
       hibernate:
@@ -28,7 +27,7 @@ spring:
 
   sql:
     init:
-      mode: never
+      mode: always
 
   web:
     resources:

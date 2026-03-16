@@ -1,5 +1,8 @@
 package com.hana8.hanaro.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,21 +19,22 @@ public class ProductImage extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_id", nullable = false)
-	@ToString.Exclude
-	private Product product;
-
 	@Column(nullable = false)
 	private String orgName;   // 원본 파일명
 
 	@Column(nullable = false)
-	private String saveName;  // 저장 파일명 (UUID 등)
+	private String saveName;  // 저장 파일명
 
 	@Column(nullable = false)
-	private String saveDir;   // 저장 경로 (예: 2026/03/14)
+	private String saveDir;   // 저장 경로
 
-	private Integer order;    // 노출 순서
+	private Integer sortOrder;    // 노출 순서
 
-	private String remark;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+		name = "product", referencedColumnName = "id",
+		columnDefinition = "int unsigned",
+		foreignKey = @ForeignKey(name = "fk_ProductImage_product"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Product product;
 }

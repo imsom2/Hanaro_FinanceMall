@@ -13,7 +13,6 @@ import com.hana8.hanaro.common.enums.ProductType;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "product")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,45 +21,40 @@ public class Product extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(columnDefinition = "int unsigned")
 	private Long id;
 
 	@Column(nullable = false)
-	private String name;
+	private String productName;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private ProductType productType;
 
+	@Column(nullable = false, columnDefinition = "int unsigned")
+	private Long min;  // 최저 납입금액
+
+	@Column(nullable = false, columnDefinition = "int unsigned")
 	private Long max;  // 최대 납입금액
 
-	@Enumerated(EnumType.STRING)
-	private PaymentCycle paymentCycle;  // 납입주기
-
+	@Column(nullable = false, columnDefinition = "int unsigned")
 	private Integer period;  // 가입기간 (개월)
 
-	@Column(precision = 5, scale = 2)
+	@Column(nullable = false, precision = 5, scale = 2)
 	private BigDecimal maturityYield;  // 만기수익률
 
-	@Column(precision = 5, scale = 2)
+	@Column(nullable = false, precision = 5, scale = 2)
 	private BigDecimal cancelYield;  // 해지수익률
 
 	@Column(columnDefinition = "TEXT")
 	private String description;  // 상품설명
 
 	@Column(nullable = false)
+	@Builder.Default
 	private boolean isDeleted = false;
 
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "product", orphanRemoval = true)
 	@ToString.Exclude
+	@Builder.Default
 	private List<ProductImage> images = new ArrayList<>();
-
-	// 편의 메서드
-	public void addImage(ProductImage image) {
-		images.add(image);
-		image.setProduct(this);
-	}
-
-	public void softDelete() {
-		this.isDeleted = true;
-	}
 }

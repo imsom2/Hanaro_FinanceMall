@@ -1,5 +1,8 @@
 package com.hana8.hanaro.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.hana8.hanaro.common.enums.AccountType;
 
 import jakarta.persistence.*;
@@ -8,7 +11,12 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "account")
+@Table(uniqueConstraints = {
+		@UniqueConstraint(
+			name = "uniq_Account_accountNum",
+			columnNames = {"accountNum"}
+		)
+	})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,14 +25,10 @@ public class Account extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(columnDefinition = "int unsigned")
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
-	@ToString.Exclude
-	private User user;
-
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false, length = 11)
 	private String accountNum;
 
 	@Enumerated(EnumType.STRING)
@@ -32,15 +36,16 @@ public class Account extends BaseEntity {
 	private AccountType accountType;
 
 	@Column(nullable = false)
+	@Builder.Default
 	private Long balance = 0L;
 
-	// 편의 메서드
-	public void deposit(Long amount) {
-		this.balance += amount;
-	}
-
-	public void withdraw(Long amount) {
-		if (this.balance < amount) throw new IllegalStateException("잔액이 부족합니다.");
-		this.balance -= amount;
-	}
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+		name = "user", referencedColumnName = "id",
+		columnDefinition = "int unsigned",
+		foreignKey = @ForeignKey(name = "fk_Account_user")
+	)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	@ToString.Exclude
+	private User user;
 }
