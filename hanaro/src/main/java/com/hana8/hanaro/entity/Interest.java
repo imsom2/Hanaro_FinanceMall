@@ -1,5 +1,9 @@
 package com.hana8.hanaro.entity;
-import com.hana8.hanaro.common.enums.InterestType;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,7 +11,6 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "interest")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,14 +22,23 @@ public class Interest extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "subscription_id", nullable = false)
-	@ToString.Exclude
+	@JoinColumn(
+		name = "subscription", referencedColumnName = "id",
+		columnDefinition = "int unsigned",
+		foreignKey = @ForeignKey(name = "fk_Interest_subscription")
+	)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Subscription subscription;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private InterestType interestType;
+	@Column(nullable = false, precision = 15, scale = 2)
+	private BigDecimal amount;  // 이자 금액
 
 	@Column(nullable = false)
-	private Long amount;  // 이자 금액
+	private LocalDateTime calcDate;  // 계산 기준일 (배치 실행일)
+
+	@Column(nullable = false, precision = 5, scale = 2)
+	private BigDecimal appliedRate;  // 적용된 이율
+
+	@Column(nullable = false, columnDefinition = "int unsigned")
+	private Integer elapsedDays;  // 가입일 ~ 계산 기준일
 }
