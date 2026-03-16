@@ -1,5 +1,4 @@
-name: Claude Code Review
-
+name: Claude Code
 on:
   pull_request:
     types: [opened, synchronize]
@@ -7,19 +6,15 @@ on:
     types: [created]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   issues: write
-  id-token: write
 
 jobs:
   claude:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - uses: anthropics/claude-code-action@beta
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_model: "claude-sonnet-4-20250514"
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
