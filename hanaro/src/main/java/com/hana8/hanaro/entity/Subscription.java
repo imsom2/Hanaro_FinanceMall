@@ -64,6 +64,7 @@ public class Subscription extends BaseEntity {
 		foreignKey = @ForeignKey(name = "fk_Subscription_product")
 	)
 	@OnDelete(action = OnDeleteAction.CASCADE)
+	@ToString.Exclude
 	private Product product;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -73,6 +74,7 @@ public class Subscription extends BaseEntity {
 		foreignKey = @ForeignKey(name = "fk_Subscription_account")
 	)
 	@OnDelete(action = OnDeleteAction.CASCADE)
+	@ToString.Exclude
 	private Account account;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -83,6 +85,7 @@ public class Subscription extends BaseEntity {
 		foreignKey = @ForeignKey(name = "fk_Subscription_user")
 	)
 	@OnDelete(action = OnDeleteAction.CASCADE)
+	@ToString.Exclude
 	private User user;
 
 }
