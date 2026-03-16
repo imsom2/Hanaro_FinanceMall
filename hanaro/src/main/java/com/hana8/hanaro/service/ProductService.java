@@ -5,6 +5,8 @@ import com.hana8.hanaro.dto.ProductListDTO;
 import com.hana8.hanaro.entity.Product;
 import com.hana8.hanaro.repository.ProductRepository;
 import com.hana8.hanaro.mapper.ProductMapper;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,11 +42,13 @@ public class ProductService {
 	}
 
 	// 상품 등록
+	@Transactional
 	public ProductDTO createProduct(ProductDTO dto) {
 		return mapper.toDTO(repository.save(mapper.toEntity(dto)));
 	}
 
 	// 상품 수정
+	@Transactional
 	public ProductDTO updateProduct(Long id, ProductDTO dto) {
 
 		Product product = repository.findByIdAndDeletedFalse(id)
@@ -63,6 +67,7 @@ public class ProductService {
 	}
 
 	// 상품 삭제 (soft delete)
+	@Transactional
 	public void deleteProduct(Long id) {
 		Product product = repository.findByIdAndDeletedFalse(id)
 			.orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다. id=" + id));
