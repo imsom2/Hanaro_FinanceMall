@@ -36,7 +36,8 @@ public class Account extends BaseEntity {
 	private AccountType accountType;
 
 	@Column(nullable = false)
-	private Long balance;
+	@Builder.Default
+	private Long balance = 0L;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
@@ -45,5 +46,6 @@ public class Account extends BaseEntity {
 		foreignKey = @ForeignKey(name = "fk_Account_user")
 	)
 	@OnDelete(action = OnDeleteAction.CASCADE)
+	@ToString.Exclude
 	private User user;
 }

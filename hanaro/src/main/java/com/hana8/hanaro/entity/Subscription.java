@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -32,6 +33,12 @@ public class Subscription extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	private PaymentCycle paymentCycle;  // 납입주기 (가입 시 지정)
+
+	@Column
+	private Integer paymentDay;  // MONTHLY일 경우
+
+	@Enumerated(EnumType.STRING)
+	private DayOfWeek paymentDayOfWeek;  // WEEKLY일 경우
 
 	@Column(nullable = false)
 	private LocalDate joinDate;  // 가입일
