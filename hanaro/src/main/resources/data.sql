@@ -15,19 +15,19 @@ VALUES
     ('user2@hanaro.com', 'user1234!',  '김하나', 'ROLE_USER');
 
 -- ── 2. PRODUCT ───────────────────────────────────────────────────
-INSERT INTO Product (productName, productType, min, max, period, maturityYield, cancelYield, description, isDeleted)
+INSERT INTO Product (productName, productType, min, max, period, maturityYield, cancelYield, description, deleted)
 VALUES
     ('하나 안심 정기예금',    'DEPOSIT', 100000, 100000000, 12, 3.50, 1.00, '1년 만기 정기예금 상품입니다. 안정적인 수익을 원하시는 고객님께 추천드립니다.', false),
     ('하나 목돈 마련 적금',   'SAVINGS',  10000,   1000000, 12, 4.20, 1.50, '매월 자유롭게 납입하는 적금 상품입니다. 목돈 마련에 최적화된 상품입니다.',   false),
     ('(종료) 하나 특별 적금', 'SAVINGS',  50000,    500000,  6, 5.00, 2.00, '종료된 상품입니다.', true);
 
 -- ── 3. PRODUCT_IMAGE ─────────────────────────────────────────────
-INSERT INTO ProductImage (product, orgName, saveName, saveDir, sortOrder)
+INSERT INTO ProductImage (product, orgName, saveName, saveDir)
 VALUES
-    (1, 'deposit_main.jpg',   '20260314_deposit_main.jpg',   '2026/03/14', 1),
-    (1, 'deposit_detail.jpg', '20260314_deposit_detail.jpg', '2026/03/14', 2),
-    (2, 'savings_main.jpg',   '20260314_savings_main.jpg',   '2026/03/14', 1),
-    (2, 'savings_detail.jpg', '20260314_savings_detail.jpg', '2026/03/14', 2);
+    (1, 'deposit_main.jpg',   '20260314_deposit_main.jpg',   '2026/03/14'),
+    (1, 'deposit_detail.jpg', '20260314_deposit_detail.jpg', '2026/03/14'),
+    (2, 'savings_main.jpg',   '20260314_savings_main.jpg',   '2026/03/14'),
+    (2, 'savings_detail.jpg', '20260314_savings_detail.jpg', '2026/03/14');
 
 -- ── 4. ACCOUNT ───────────────────────────────────────────────────
 INSERT INTO Account (user, accountNum, accountType, balance)

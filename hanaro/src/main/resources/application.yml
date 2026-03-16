@@ -41,12 +41,11 @@ spring:
 
 upload:
   path: src/main/resources/static/upload
-  secure: src/main/upload/secure
 
 springdoc:
   swagger-ui:
     enabled: true
-    path: /swagger.html
+    path: /swagger-ui.html
   api-docs:
     enabled: true
-    path: /hana8/api-docs
+    path: /v3/api-docs

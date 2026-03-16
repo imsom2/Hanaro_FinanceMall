@@ -28,8 +28,6 @@ public class ProductImage extends BaseEntity {
 	@Column(nullable = false)
 	private String saveDir;   // 저장 경로
 
-	private Integer sortOrder;    // 노출 순서
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 		name = "product", referencedColumnName = "id",

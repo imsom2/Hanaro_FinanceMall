@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hana8.hanaro.common.enums.PaymentCycle;
 import com.hana8.hanaro.common.enums.ProductType;
 
 @EqualsAndHashCode(callSuper = true)
@@ -51,7 +50,7 @@ public class Product extends BaseEntity {
 
 	@Column(nullable = false)
 	@Builder.Default
-	private boolean isDeleted = false;
+	private boolean deleted = false; // soft delete
 
 	@OneToMany(mappedBy = "product", orphanRemoval = true)
 	@ToString.Exclude
