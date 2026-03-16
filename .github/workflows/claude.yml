@@ -16,6 +16,8 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # ← 추가
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
