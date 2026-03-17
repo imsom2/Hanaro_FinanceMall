@@ -1,5 +1,6 @@
 package com.hana8.hanaro.entity;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -70,7 +71,6 @@ public class Subscription extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 		name = "account", referencedColumnName = "id",
-		columnDefinition = "int unsigned",
 		foreignKey = @ForeignKey(name = "fk_Subscription_account")
 	)
 	@OnDelete(action = OnDeleteAction.CASCADE)
@@ -79,9 +79,7 @@ public class Subscription extends BaseEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
-		name = "user",
-		referencedColumnName = "id",
-		columnDefinition = "int unsigned",
+		name = "user", referencedColumnName = "id",
 		foreignKey = @ForeignKey(name = "fk_Subscription_user")
 	)
 	@OnDelete(action = OnDeleteAction.CASCADE)
