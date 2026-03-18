@@ -53,7 +53,7 @@ public class AuthController {
 	public SuccessResponseDTO<Map<String, Object>> signIn(@RequestBody @Validated LoginRequest loginRequest) {
 		Map<String, Object> response = authService.signIn(loginRequest);
 		return SuccessResponseDTO.of(SuccessCode.SIGNIN_SUCCESS, response);
-	} // <- 여기서 } 하나가 과하게 들어가 클래스가 닫혔었습니다.
+	}
 
 	@Operation(summary = "토큰 재발급", description = "Authorization 헤더의 access token과 refreshToken을 이용해 access token을 재발급합니다.")
 	@ApiResponses({

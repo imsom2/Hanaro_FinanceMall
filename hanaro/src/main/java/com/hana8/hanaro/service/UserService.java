@@ -66,8 +66,7 @@ public class UserService {
 		accountRepository.save(account);
 
 		SignUpDTO response = userMapper.toSignUpDTO(user);
-		String formatted = accountUtil.format(rawAccountNum);
-		response.setMaskedAccountNum(accountUtil.mask(formatted));
+		response.setMaskedAccountNum(rawAccountNum);
 		return response;
 	}
 

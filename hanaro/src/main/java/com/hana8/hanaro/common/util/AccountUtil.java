@@ -10,21 +10,25 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 
-import lombok.RequiredArgsConstructor;
-
 @Component
 public class AccountUtil {
 
-	private final String key;
+	private final byte[] keyBytes;
 	public AccountUtil(@Value("${account.key}") String key) {
-		this.key = key;
+		if (key == null) {
+			throw new IllegalArgumentException("암호화 키(account.key)가 설정되지 않았습니다.");
+		}
+		byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
+		if (bytes.length != 16 && bytes.length != 24 && bytes.length != 32) {
+			throw new IllegalArgumentException("AES 키 길이는 16, 24, 32 바이트여야 합니다. 현재 길이: " + bytes.length);
+		}
+		this.keyBytes = bytes;
 	}
-
 
 	public String encrypt(String accountNum) {
 		if (accountNum == null) return null;
 		try {
-			SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+			SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
 			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 			byte[] iv = new byte[12];
 			new SecureRandom().nextBytes(iv);
@@ -43,7 +47,7 @@ public class AccountUtil {
 	public String decrypt(String encryptedAccountNum) {
 		if (encryptedAccountNum == null) return null;
 		try {
-			SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+			SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
 			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 			byte[] decoded = Base64.getDecoder().decode(encryptedAccountNum);
 			byte[] iv = new byte[12];

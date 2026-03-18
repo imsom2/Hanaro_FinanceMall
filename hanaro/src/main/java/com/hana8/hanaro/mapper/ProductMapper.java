@@ -13,6 +13,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
+	ProductDTO toDTO(ProductRequestDTO requestDto);
 
 	ProductDTO toDTO(Product product);
 

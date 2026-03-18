@@ -5,6 +5,7 @@ import com.hana8.hanaro.common.exception.SuccessResponseDTO;
 import com.hana8.hanaro.dto.ProductDTO;
 import com.hana8.hanaro.dto.ProductListDTO;
 import com.hana8.hanaro.dto.ProductRequestDTO;
+import com.hana8.hanaro.mapper.ProductMapper;
 import com.hana8.hanaro.service.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,13 +27,13 @@ import java.util.List;
 public class ProductController {
 
 	private final ProductService service;
+	private final ProductMapper mapper;
 
 	@Operation(summary = "상품 목록 조회", description = "삭제되지 않은 예적금 상품 목록을 조회합니다.")
 	@ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
 	@GetMapping
 	public SuccessResponseDTO<List<ProductListDTO>> getProducts() {
 		List<ProductListDTO> data = service.getProducts();
-		// 문자열 대신 SuccessCode 사용으로 통일
 		return SuccessResponseDTO.of(SuccessCode._OK, data);
 	}
 
@@ -56,7 +57,10 @@ public class ProductController {
 	})
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public SuccessResponseDTO<ProductDTO> createProduct(@Validated(ProductRequestDTO.OnCreate.class) @RequestBody ProductDTO dto) {
+	public SuccessResponseDTO<ProductDTO> createProduct(
+		@Validated(ProductRequestDTO.OnCreate.class) @RequestBody ProductRequestDTO requestDto
+	) {
+		ProductDTO dto = mapper.toDTO(requestDto);
 		ProductDTO data = service.createProduct(dto);
 		return SuccessResponseDTO.of(SuccessCode.PRODUCT_CREATED, data);
 	}
@@ -72,8 +76,9 @@ public class ProductController {
 	@PreAuthorize("hasRole('ADMIN')")
 	public SuccessResponseDTO<ProductDTO> updateProduct(
 		@PathVariable Long id,
-		@Validated(ProductRequestDTO.OnUpdate.class) @RequestBody ProductDTO dto
+		@Validated(ProductRequestDTO.OnUpdate.class) @RequestBody ProductRequestDTO requestDto
 	) {
+		ProductDTO dto = mapper.toDTO(requestDto);
 		dto.setId(id);
 		ProductDTO data = service.updateProduct(id, dto);
 		return SuccessResponseDTO.of(SuccessCode.PRODUCT_UPDATED, data);

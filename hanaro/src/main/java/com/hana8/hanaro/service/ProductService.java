@@ -28,6 +28,7 @@ public class ProductService {
 			.map(product -> {
 				ProductListDTO dto = mapper.toListDTO(product);
 				product.getImages().stream()
+					.filter(img -> !img.isDeleted())
 					.findFirst()
 					.ifPresent(img -> dto.setThumbImage(mapper.toImageDTO(img)));
 				return dto;
@@ -40,7 +41,13 @@ public class ProductService {
 		Product product = repository.findByIdAndDeletedFalse(id)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
 				"상품이 존재하지 않습니다. id=" + id));
-		return mapper.toDTO(product);
+		ProductDTO dto = mapper.toDTO(product);
+		if (dto.getImages() != null) {
+			dto.setImages(dto.getImages().stream()
+				.filter(img -> !img.isDeleted())
+				.toList());
+		}
+		return dto;
 	}
 
 	// 상품 등록
@@ -76,6 +83,6 @@ public class ProductService {
 				"상품이 존재하지 않습니다. id=" + id));
 
 		product.setDeleted(true);
-		product.getImages().clear();
+		product.getImages().forEach(image -> image.setDeleted(true));
 	}
 }

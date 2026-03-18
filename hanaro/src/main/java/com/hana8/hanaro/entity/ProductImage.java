@@ -29,11 +29,14 @@ public class ProductImage extends BaseEntity {
 	@Column(nullable = false)
 	private String saveDir;   // 저장 경로
 
+	@Column(nullable = false)
+	@Builder.Default
+	private boolean deleted = false;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 		name = "product", referencedColumnName = "id",
 		columnDefinition = "int unsigned",
 		foreignKey = @ForeignKey(name = "fk_ProductImage_product"))
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Product product;
 }

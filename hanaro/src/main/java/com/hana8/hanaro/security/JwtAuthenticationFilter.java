@@ -5,6 +5,7 @@ import com.hana8.hanaro.common.enums.Role;
 import com.hana8.hanaro.common.exception.ErrorCode;
 import com.hana8.hanaro.common.exception.ErrorResponseDTO;
 import com.hana8.hanaro.dto.auth.UserDetailsDTO;
+import com.hana8.hanaro.security.exception.CustomJwtException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -87,8 +88,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			SecurityContextHolder.getContext().setAuthentication(
 				new UsernamePasswordAuthenticationToken(dto, null, dto.getAuthorities())
 			);
-
-		} catch (Exception e) {
+		} catch (CustomJwtException e) {
+			sendError(response, e.getErrorCode());
+			return;
+		} catch (IllegalArgumentException | ClassCastException e) {
 			sendError(response, ErrorCode.JWT_INVALID);
 			return;
 		}

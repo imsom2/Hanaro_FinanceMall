@@ -79,11 +79,14 @@ public class ProductImageService {
 	}
 
 	public ResponseEntity<Resource> downloadImage(Long productId, Long imageId, boolean inline) {
-		ProductImage image = productImageRepository.findById(imageId)
+		ProductImage image = productImageRepository.findByIdAndDeletedFalse(imageId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND,
-				"상품 이미지를 찾을 수 없습니다. id=" + imageId));
+				"이미지를 찾을 수 없거나 삭제된 상태입니다. id=" + imageId));
 
-		validateProductOwnership(productId, image);
+		validateImageOwnership(productId, image);
+		if (image.getProduct().isDeleted()) {
+			throw new BusinessException(ErrorCode.PRODUCT_ALREADY_DELETED);
+		}
 
 		return fileService.download(image.getSaveDir(), image.getSaveName(), inline);
 	}
@@ -92,29 +95,15 @@ public class ProductImageService {
 	public void deleteImage(Long productId, Long imageId) {
 		ProductImage image = productImageRepository.findById(imageId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND,
-				"상품 이미지를 찾을 수 없습니다. id=" + imageId));
+				"이미지를 찾을 수 없거나 삭제된 상태입니다. id=" + imageId));
 
-		validateProductOwnership(productId, image);
-
-		String saveName = image.getSaveName();
-		String saveDir = image.getSaveDir();
-
-		productImageRepository.delete(image);
-
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-			@Override
-			public void afterCommit() {
-				fileService.delete(saveName, saveDir);
-			}
-		});
+		validateImageOwnership(productId, image);
+		image.setDeleted(true);
 	}
 
-	private void validateProductOwnership(Long productId, ProductImage image) {
+	private void validateImageOwnership(Long productId, ProductImage image) {
 		if (!image.getProduct().getId().equals(productId)) {
 			throw new BusinessException(ErrorCode.IMAGE_NOT_OWNED);
-		}
-		if (image.getProduct().isDeleted()) {
-			throw new BusinessException(ErrorCode.PRODUCT_ALREADY_DELETED);
 		}
 	}
 
@@ -128,6 +117,15 @@ public class ProductImageService {
 		for (MultipartFile file : files) {
 			if (file == null || file.isEmpty()) {
 				throw new BusinessException(ErrorCode.IMAGE_EMPTY);
+			}
+
+			long fileSize = file.getSize();
+			if (fileSize > MAX_FILE_SIZE) {
+				throw new BusinessException(ErrorCode.IMAGE_TOO_LARGE);
+			}
+			totalSize += fileSize;
+			if (totalSize > MAX_TOTAL_SIZE) {
+				throw new BusinessException(ErrorCode.IMAGE_TOTAL_TOO_LARGE);
 			}
 
 			String contentType = file.getContentType();
@@ -147,16 +145,6 @@ public class ProductImageService {
 				throw new BusinessException(ErrorCode.INVALID_FILE,
 					"이미지 파일을 읽을 수 없습니다: " + file.getOriginalFilename());
 			}
-
-			if (file.getSize() > MAX_FILE_SIZE) {
-				throw new BusinessException(ErrorCode.IMAGE_TOO_LARGE);
-			}
-
-			totalSize += file.getSize();
-		}
-
-		if (totalSize > MAX_TOTAL_SIZE) {
-			throw new BusinessException(ErrorCode.IMAGE_TOTAL_TOO_LARGE);
 		}
 	}
 
