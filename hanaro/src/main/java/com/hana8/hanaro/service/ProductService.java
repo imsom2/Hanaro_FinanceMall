@@ -8,11 +8,14 @@ import com.hana8.hanaro.entity.Product;
 import com.hana8.hanaro.mapper.ProductMapper;
 import com.hana8.hanaro.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -53,16 +56,21 @@ public class ProductService {
 	// 상품 등록
 	@Transactional
 	public ProductDTO createProduct(ProductDTO dto) {
-		return mapper.toDTO(repository.save(mapper.toEntity(dto)));
+		log.info("새로운 상품 등록 시도: name={}", dto.getProductName());
+		Product product = repository.save(mapper.toEntity(dto));
+		log.info("상품 등록 완료: ID={}, name={}", product.getId(), product.getProductName());
+		return mapper.toDTO(product);
 	}
 
 	// 상품 수정
 	@Transactional
 	public ProductDTO updateProduct(Long id, ProductDTO dto) {
+		log.info("상품 수정 시도: ID={}, targetName={}", id, dto.getProductName());
 		Product product = repository.findByIdAndDeletedFalse(id)
-			.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
-				"상품이 존재하지 않습니다. id=" + id));
-
+			.orElseThrow(() -> {
+				log.warn("수정 대상 상품 없음: ID={}", id);
+				return new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "상품이 존재하지 않습니다. id=" + id);
+			});
 		product.setProductName(dto.getProductName());
 		product.setProductType(dto.getProductType());
 		product.setMin(dto.getMin());
@@ -72,17 +80,21 @@ public class ProductService {
 		product.setCancelYield(dto.getCancelYield());
 		product.setDescription(dto.getDescription());
 
+		log.info("상품 정보 수정 완료: ID={}", id);
 		return mapper.toDTO(product);
 	}
 
 	// 상품 삭제 (soft delete)
 	@Transactional
 	public void deleteProduct(Long id) {
+		log.info("상품 삭제 시도: ID={}", id);
 		Product product = repository.findByIdAndDeletedFalse(id)
-			.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
-				"상품이 존재하지 않습니다. id=" + id));
-
+			.orElseThrow(() -> {
+				log.warn("삭제 대상 상품 없음: ID={}", id);
+				return new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "상품이 존재하지 않습니다. id=" + id);
+			});
 		product.setDeleted(true);
 		product.getImages().forEach(image -> image.setDeleted(true));
+		log.info("상품 및 관련 이미지 삭제 처리 완료: ID={}", id);
 	}
 }

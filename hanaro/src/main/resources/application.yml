@@ -45,6 +45,20 @@ spring:
 upload:
   path: src/main/resources/static/upload
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: env,beans
+  endpoint:
+    metrics:
+      access: read_only
+    shutdown:
+      access: unrestricted
+    health:
+      show-details: always
+
 springdoc:
   swagger-ui:
     enabled: true

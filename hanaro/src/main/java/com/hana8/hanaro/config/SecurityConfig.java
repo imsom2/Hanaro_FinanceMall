@@ -45,7 +45,9 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/**", "/favicon.ico", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+				.requestMatchers("/api/auth/**", "/favicon.ico", "/swagger-ui/**", "/v3/api-docs/**","/actuator/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // 일반 상품 조회는 로그인없이 가능
+				.requestMatchers("/api/admin/**").hasRole("ADMIN")
 				.anyRequest().authenticated()
 			)
 			.exceptionHandling(config -> config.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))

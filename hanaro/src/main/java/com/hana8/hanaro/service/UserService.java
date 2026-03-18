@@ -4,7 +4,7 @@ import com.hana8.hanaro.common.enums.AccountType;
 import com.hana8.hanaro.common.enums.Role;
 import com.hana8.hanaro.common.exception.BusinessException;
 import com.hana8.hanaro.common.exception.ErrorCode;
-import com.hana8.hanaro.common.util.AccountUtil; // Util 추가
+import com.hana8.hanaro.common.converter.AccountUtil;
 import com.hana8.hanaro.dto.auth.SignUpDTO;
 import com.hana8.hanaro.dto.auth.SignUpRequestDTO;
 import com.hana8.hanaro.entity.Account;
@@ -13,12 +13,15 @@ import com.hana8.hanaro.mapper.UserMapper;
 import com.hana8.hanaro.repository.AccountRepository;
 import com.hana8.hanaro.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,24 +31,23 @@ public class UserService {
 	private final AccountRepository accountRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserMapper userMapper;
-	private final AccountUtil accountUtil;
 
 	@Transactional
 	public SignUpDTO signUp(SignUpRequestDTO dto) {
-
+		log.info("회원가입 요청 수신");
 		if (userRepository.existsByEmail(dto.getEmail())) {
+			log.warn("회원가입 중단: 이메일 중복");
 			throw new BusinessException(ErrorCode.USER_EMAIL_DUPLICATE);
 		}
 
-		String rawAccountNum;
+		String accountNum;
 		if (dto.getAccountNum() != null && !dto.getAccountNum().isBlank()) {
-			String encryptedInput = accountUtil.encrypt(dto.getAccountNum());
-			if (accountRepository.existsByAccountNum(encryptedInput)) {
+			if (accountRepository.existsByAccountNum(AccountUtil.encrypt(dto.getAccountNum()))) {
 				throw new BusinessException(ErrorCode.ACCOUNT_NUM_DUPLICATE);
 			}
-			rawAccountNum = dto.getAccountNum();
+			accountNum = dto.getAccountNum();
 		} else {
-			rawAccountNum = generateUniqueAccountNum();
+			accountNum = generateUniqueAccountNum();
 		}
 
 		User user = User.builder()
@@ -59,14 +61,16 @@ public class UserService {
 
 		Account account = Account.builder()
 			.user(user)
-			.accountNum(accountUtil.encrypt(rawAccountNum))
+			.accountNum(accountNum)
 			.accountType(AccountType.BASIC)
 			.build();
 
 		accountRepository.save(account);
 
+		log.info("회원가입 완료: userId={}, accountId={}", user.getId(), account.getId());
+
 		SignUpDTO response = userMapper.toSignUpDTO(user);
-		response.setMaskedAccountNum(rawAccountNum);
+		response.setMaskedAccountNum(accountNum);
 		return response;
 	}
 
@@ -74,7 +78,7 @@ public class UserService {
 		int maxRetry = 10;
 		for (int i = 0; i < maxRetry; i++) {
 			String accountNum = generateAccountNum();
-			if (!accountRepository.existsByAccountNum(accountUtil.encrypt(accountNum))) {
+			if (!accountRepository.existsByAccountNum(AccountUtil.encrypt(accountNum))) {
 				return accountNum;
 			}
 		}
