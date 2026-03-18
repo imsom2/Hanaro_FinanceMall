@@ -12,8 +12,6 @@ public class AccountNumSerializer extends StdSerializer<String> {
 
 	@Override
 	public void serialize(String value, JsonGenerator gen, SerializationContext provider) throws JacksonException {
-		System.out.println("serializer called: " + value);
-
 		if (value == null) {
 			gen.writeNull();
 			return;

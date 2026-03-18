@@ -44,6 +44,8 @@ public enum ErrorCode {
 	ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND,         "ACCOUNT_001", "계좌를 찾을 수 없습니다."),
 	ACCOUNT_NUM_DUPLICATE(HttpStatus.CONFLICT,      "ACCOUNT_002", "이미 사용 중인 계좌번호입니다."),
 	ACCOUNT_INSUFFICIENT(HttpStatus.BAD_REQUEST,    "ACCOUNT_003", "잔액이 부족합니다."),
+	ACCOUNT_INVALID_NUM(HttpStatus.BAD_REQUEST,    "ACCOUNT_004", "계좌번호 형식이 올바르지 않습니다."),
+
 
 	// ── Subscription ─────────────────────────────────────────────
 	SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND,    "SUB_001", "가입 내역을 찾을 수 없습니다."),

@@ -3,6 +3,7 @@ package com.hana8.hanaro.common.converter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -10,59 +11,51 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 
+import com.hana8.hanaro.common.exception.BusinessException;
+import com.hana8.hanaro.common.exception.ErrorCode;
+
 @Component
 public class AccountUtil {
 
 	private static byte[] keyBytes;
-
 	public AccountUtil(@Value("${account.key}") String key) {
-		byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
-		if (bytes.length != 16 && bytes.length != 24 && bytes.length != 32) {
-			throw new IllegalArgumentException("AES 키 길이는 16, 24, 32 바이트여야 합니다.");
-		}
-		AccountUtil.keyBytes = bytes;
+		keyBytes = key.getBytes(StandardCharsets.UTF_8);
 	}
 
+	// 암호화
 	public static String encrypt(String accountNum) {
 		if (accountNum == null) return null;
 		try {
 			SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
-			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-			byte[] iv = new byte[12];
-			new SecureRandom().nextBytes(iv);
-			GCMParameterSpec spec = new GCMParameterSpec(128, iv);
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			cipher.init(Cipher.ENCRYPT_MODE, secretKey, new javax.crypto.spec.IvParameterSpec(new byte[16]));
+
 			byte[] encrypted = cipher.doFinal(accountNum.getBytes(StandardCharsets.UTF_8));
-			byte[] combined = new byte[iv.length + encrypted.length];
-			System.arraycopy(iv, 0, combined, 0, iv.length);
-			System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
-			return Base64.getEncoder().encodeToString(combined);
+			return Base64.getEncoder().encodeToString(encrypted);
 		} catch (Exception e) {
-			throw new RuntimeException("계좌번호 암호화 중 오류 발생", e);
+			throw new RuntimeException("암호화 오류", e);
 		}
 	}
 
-	public static String decrypt(String encryptedAccountNum) {
-		if (encryptedAccountNum == null) return null;
+	// 복호화
+	public static String decrypt(String encrypted) {
+		if (encrypted == null) return null;
 		try {
 			SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
-			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-			byte[] decoded = Base64.getDecoder().decode(encryptedAccountNum);
-			byte[] iv = new byte[12];
-			System.arraycopy(decoded, 0, iv, 0, 12);
-			GCMParameterSpec spec = new GCMParameterSpec(128, iv);
-			cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
-			return new String(cipher.doFinal(decoded, 12, decoded.length - 12), StandardCharsets.UTF_8);
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			cipher.init(Cipher.DECRYPT_MODE, secretKey, new javax.crypto.spec.IvParameterSpec(new byte[16]));
+
+			byte[] decoded = Base64.getDecoder().decode(encrypted);
+			return new String(cipher.doFinal(decoded), StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			throw new RuntimeException("계좌번호 복호화 중 오류 발생", e);
+			return encrypted;
 		}
 	}
 
-	public static String mask(String rawAccountNum) {
-		if (rawAccountNum == null || rawAccountNum.length() != 11) return rawAccountNum;
-
-		String masked = rawAccountNum.substring(0, 3) + "****" + rawAccountNum.substring(7);
-
-		return masked.replaceFirst("(\\d{3})(\\*{4})(\\d{4})", "$1-$2-$3");
+	public static String mask(String raw) {
+		if (raw == null || raw.length() < 11) return raw;
+		String clean = raw.replaceAll("[\\s-]", "");
+		String masked = clean.substring(0, 3) + "****" + clean.substring(7);
+		return masked.replaceFirst("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
 	}
 }

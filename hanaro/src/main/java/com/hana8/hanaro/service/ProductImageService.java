@@ -109,11 +109,12 @@ public class ProductImageService {
 	public void deleteImage(Long productId, Long imageId) {
 		log.info("이미지 삭제 시도: productId={}, imageId={}", productId, imageId);
 
-		ProductImage image = productImageRepository.findById(imageId)
+		ProductImage image = productImageRepository.findByIdAndDeletedFalse(imageId)
 			.orElseThrow(() -> {
 				log.warn("이미지 찾을 수 없음: imageId={}", imageId);
 				return new BusinessException(ErrorCode.IMAGE_NOT_FOUND, "이미지를 찾을 수 없거나 삭제된 상태입니다. id=" + imageId);
 			});
+
 		validateImageOwnership(productId, image);
 		image.setDeleted(true);
 		log.info("이미지 삭제(Soft Delete) 완료: imageId={}", imageId);
