@@ -13,6 +13,7 @@ public enum ErrorCode {
 	INVALID_FILE(HttpStatus.BAD_REQUEST,            "COMMON_002", "유효하지 않은 파일입니다."),
 	FILE_NOT_FOUND(HttpStatus.NOT_FOUND,            "COMMON_003", "파일을 찾을 수 없습니다."),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_004", "서버 오류가 발생했습니다."),
+	DATABASE_ERROR(HttpStatus.CONFLICT,             "COMMON_005", "데이터 처리 중 충돌이 발생했습니다."),
 
 	// ── Auth ─────────────────────────────────────────────────────
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED,           "AUTH_001", "로그인이 필요합니다."),
@@ -37,6 +38,7 @@ public enum ErrorCode {
 	IMAGE_TOO_LARGE(HttpStatus.BAD_REQUEST,         "IMAGE_004", "파일 1개당 최대 크기는 2MB입니다."),
 	IMAGE_TOTAL_TOO_LARGE(HttpStatus.BAD_REQUEST,   "IMAGE_005", "전체 파일 크기 합은 10MB를 초과할 수 없습니다."),
 	IMAGE_EMPTY(HttpStatus.BAD_REQUEST,             "IMAGE_006", "업로드할 파일이 없습니다."),
+	IMAGE_ALREADY_DELETED(HttpStatus.BAD_REQUEST,   "IMAGE_007", "이미 삭제된 이미지입니다."),
 
 	// ── Account ──────────────────────────────────────────────────
 	ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND,         "ACCOUNT_001", "계좌를 찾을 수 없습니다."),
@@ -49,7 +51,7 @@ public enum ErrorCode {
 	SUBSCRIPTION_ALREADY_MATURED(HttpStatus.BAD_REQUEST,   "SUB_003", "이미 만기 처리된 가입 내역입니다."),
 
 	// ── Interest ─────────────────────────────────────────────────
-	INTEREST_NOT_FOUND(HttpStatus.NOT_FOUND,        "INTEREST_001", "이자 내역을 찾을 수 없습니다.");
+	INTEREST_NOT_FOUND(HttpStatus.NOT_FOUND, "INTEREST_001", "이자 내역을 찾을 수 없습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

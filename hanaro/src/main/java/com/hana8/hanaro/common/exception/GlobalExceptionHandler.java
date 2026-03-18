@@ -2,6 +2,9 @@ package com.hana8.hanaro.common.exception;
 
 import com.hana8.hanaro.security.exception.CustomJwtException;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -65,5 +68,28 @@ public class GlobalExceptionHandler {
 		return ResponseEntity
 			.status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
 			.body(ErrorResponseDTO.of(ErrorCode.INTERNAL_SERVER_ERROR));
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	protected ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+		log.error("DataIntegrityViolationException", e);
+
+		String message = e.getMostSpecificCause().getMessage();
+
+		if (message.contains("uniq_User_email")) {
+			return ResponseEntity
+				.status(ErrorCode.USER_EMAIL_DUPLICATE.getHttpStatus())
+				.body(ErrorResponseDTO.of(ErrorCode.USER_EMAIL_DUPLICATE));
+		}
+
+		if (message.contains("uniq_Account_accountNum")) {
+			return ResponseEntity
+				.status(ErrorCode.ACCOUNT_NUM_DUPLICATE.getHttpStatus())
+				.body(ErrorResponseDTO.of(ErrorCode.ACCOUNT_NUM_DUPLICATE));
+		}
+
+		return ResponseEntity
+			.status(HttpStatus.CONFLICT)
+			.body(ErrorResponseDTO.of(ErrorCode.INVALID_INPUT, "데이터 처리 중 충돌이 발생했습니다."));
 	}
 }
