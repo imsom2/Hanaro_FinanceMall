@@ -1,4 +1,4 @@
-package com.hana8.hanaro.common.util;
+package com.hana8.hanaro.common.converter;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,19 +13,17 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class AccountUtil {
 
-	private final byte[] keyBytes;
+	private static byte[] keyBytes;
+
 	public AccountUtil(@Value("${account.key}") String key) {
-		if (key == null) {
-			throw new IllegalArgumentException("암호화 키(account.key)가 설정되지 않았습니다.");
-		}
 		byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
 		if (bytes.length != 16 && bytes.length != 24 && bytes.length != 32) {
-			throw new IllegalArgumentException("AES 키 길이는 16, 24, 32 바이트여야 합니다. 현재 길이: " + bytes.length);
+			throw new IllegalArgumentException("AES 키 길이는 16, 24, 32 바이트여야 합니다.");
 		}
-		this.keyBytes = bytes;
+		AccountUtil.keyBytes = bytes;
 	}
 
-	public String encrypt(String accountNum) {
+	public static String encrypt(String accountNum) {
 		if (accountNum == null) return null;
 		try {
 			SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
@@ -44,7 +42,7 @@ public class AccountUtil {
 		}
 	}
 
-	public String decrypt(String encryptedAccountNum) {
+	public static String decrypt(String encryptedAccountNum) {
 		if (encryptedAccountNum == null) return null;
 		try {
 			SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
@@ -60,17 +58,11 @@ public class AccountUtil {
 		}
 	}
 
-	public String format(String rawAccountNum) {
-		if (rawAccountNum == null || rawAccountNum.length() != 11) {
-			return rawAccountNum;
-		}
-		return rawAccountNum.substring(0, 3) + "-" +
-			rawAccountNum.substring(3, 9) + "-" +
-			rawAccountNum.substring(9);
-	}
+	public static String mask(String rawAccountNum) {
+		if (rawAccountNum == null || rawAccountNum.length() != 11) return rawAccountNum;
 
-	public String mask(String rawAccountNum) {
-		if (rawAccountNum == null || rawAccountNum.length() < 8) return rawAccountNum;
-		return rawAccountNum.substring(0, 4) + "****" + rawAccountNum.substring(8);
+		String masked = rawAccountNum.substring(0, 3) + "****" + rawAccountNum.substring(7);
+
+		return masked.replaceFirst("(\\d{3})(\\*{4})(\\d{4})", "$1-$2-$3");
 	}
 }

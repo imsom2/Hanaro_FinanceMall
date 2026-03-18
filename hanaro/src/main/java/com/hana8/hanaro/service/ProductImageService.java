@@ -47,7 +47,8 @@ public class ProductImageService {
 
 	@Transactional
 	public List<ProductImageDTO> uploadImages(Long productId, List<MultipartFile> files) {
-		log.info("이미지 업로드 시작: productId={}, fileCount={}", productId, files.size());
+		int fileCount = files == null ? 0 : files.size();
+		log.info("이미지 업로드 시작: productId={}, fileCount={}", productId, fileCount);
 
 		Product product = productRepository.findByIdAndDeletedFalse(productId)
 			.orElseThrow(() -> {

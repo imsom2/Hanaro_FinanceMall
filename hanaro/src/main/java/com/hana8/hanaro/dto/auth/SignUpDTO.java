@@ -1,13 +1,14 @@
 package com.hana8.hanaro.dto.auth;
 
-import com.hana8.hanaro.common.serializer.AccountNumSerializer;
+import com.hana8.hanaro.common.converter.AccountNumSerializer;
 
 import lombok.AllArgsConstructor;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import com.hana8.hanaro.common.validator.AccountNumber;
 
 @Data
 @Builder
@@ -18,6 +19,7 @@ public class SignUpDTO {
 	private Long id;
 	private String email;
 	private String name;
+	@AccountNumber
 	@JsonSerialize(using = AccountNumSerializer.class)
 	private String maskedAccountNum;
 }

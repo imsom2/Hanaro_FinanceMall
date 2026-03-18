@@ -4,7 +4,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.hana8.hanaro.common.enums.AccountType;
-import com.hana8.hanaro.common.util.AccountNumConverter;
+import com.hana8.hanaro.common.converter.AccountNumConverter;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;

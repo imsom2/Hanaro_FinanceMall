@@ -28,7 +28,7 @@ public class AuthService {
 	private final JwtUtil jwtUtil;
 
 	public Map<String, Object> signIn(LoginRequest loginRequest) {
-		log.info("로그인 시도: email={}", loginRequest.email());
+		log.info("로그인 시도");
 		try {
 			Authentication authenticate = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
@@ -36,10 +36,9 @@ public class AuthService {
 					loginRequest.passwd()
 				)
 			);
-			log.info("로그인 성공: email={}", loginRequest.email());
-			return jwtUtil.authenticationToClaims(authenticate);
+			log.info("로그인 성공: principal={}", authenticate.getName());			return jwtUtil.authenticationToClaims(authenticate);
 		} catch (AuthenticationException e) {
-			log.warn("로그인 실패: email={}", loginRequest.email());
+			log.warn("로그인 실패: 인증 오류 발생");
 			throw new BusinessException(ErrorCode.LOGIN_FAILED);
 		}
 	}

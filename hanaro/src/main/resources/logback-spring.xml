@@ -69,6 +69,4 @@
         <appender-ref ref="CONSOLE" />
     </root>
 
-    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
-
 </configuration>
