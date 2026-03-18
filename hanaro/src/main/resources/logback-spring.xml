@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOG_PATH" value="logs" />
+    <property name="LOG_PATTERN" value="%d{HH:mm:ss}] %-5level %logger{36} - %msg%n" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="USER_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/user.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/user.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory> </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="PRODUCT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/product.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/product.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SERVICE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/service.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.hana8.hanaro.service.UserService" level="INFO" additivity="false">
+        <appender-ref ref="USER_FILE" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    <logger name="com.hana8.hanaro.service.AuthService" level="INFO" additivity="false">
+        <appender-ref ref="USER_FILE" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <logger name="com.hana8.hanaro.service.ProductService" level="INFO" additivity="false">
+        <appender-ref ref="PRODUCT_FILE" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <logger name="com.hana8.hanaro.service.ProductImageService" level="INFO" additivity="false">
+        <appender-ref ref="PRODUCT_FILE" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <logger name="com.hana8.hanaro.service.SubscriptionService" level="INFO" additivity="false">
+        <appender-ref ref="SERVICE_FILE" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
+
+</configuration>

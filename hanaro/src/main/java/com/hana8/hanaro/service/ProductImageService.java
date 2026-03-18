@@ -9,6 +9,8 @@ import com.hana8.hanaro.mapper.ProductMapper;
 import com.hana8.hanaro.repository.ProductImageRepository;
 import com.hana8.hanaro.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -44,10 +47,13 @@ public class ProductImageService {
 
 	@Transactional
 	public List<ProductImageDTO> uploadImages(Long productId, List<MultipartFile> files) {
-		Product product = productRepository.findByIdAndDeletedFalse(productId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
-				"상품이 존재하지 않습니다. id=" + productId));
+		log.info("이미지 업로드 시작: productId={}, fileCount={}", productId, files.size());
 
+		Product product = productRepository.findByIdAndDeletedFalse(productId)
+			.orElseThrow(() -> {
+				log.warn("상품을 찾을 수 없음: productId={}", productId);
+				return new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "상품이 존재하지 않습니다. id=" + productId);
+			});
 		validateFiles(files);
 
 		String todayPath = getTodayPath();
@@ -67,24 +73,31 @@ public class ProductImageService {
 					.build();
 
 				savedImages.add(productImageRepository.save(image));
+				log.info("파일 저장 완료: orgName={}, saveName={}", file.getOriginalFilename(), saveName);
 			}
 		} catch (Exception e) {
+			log.error("이미지 업로드 중 오류 발생, 롤백 시작: productId={}", productId, e);
 			for (String saveName : uploadedFileNames) {
 				fileService.delete(saveName, todayPath);
 			}
 			throw e;
 		}
-
+		log.info("모든 이미지 업로드 완료: productId={}, count={}", productId, savedImages.size());
 		return productMapper.toImageDTOList(savedImages);
 	}
 
 	public ResponseEntity<Resource> downloadImage(Long productId, Long imageId, boolean inline) {
+		log.info("이미지 다운로드 요청: productId={}, imageId={}", productId, imageId);
+
 		ProductImage image = productImageRepository.findByIdAndDeletedFalse(imageId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND,
-				"이미지를 찾을 수 없거나 삭제된 상태입니다. id=" + imageId));
+			.orElseThrow(() -> {
+				log.warn("이미지 없음 또는 삭제됨: imageId={}", imageId);
+				return new BusinessException(ErrorCode.IMAGE_NOT_FOUND, "이미지를 찾을 수 없거나 삭제된 상태입니다. id=" + imageId);
+			});
 
 		validateImageOwnership(productId, image);
 		if (image.getProduct().isDeleted()) {
+			log.warn("연결된 상품이 삭제됨: productId={}", productId);
 			throw new BusinessException(ErrorCode.PRODUCT_ALREADY_DELETED);
 		}
 
@@ -93,12 +106,16 @@ public class ProductImageService {
 
 	@Transactional
 	public void deleteImage(Long productId, Long imageId) {
-		ProductImage image = productImageRepository.findById(imageId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND,
-				"이미지를 찾을 수 없거나 삭제된 상태입니다. id=" + imageId));
+		log.info("이미지 삭제 시도: productId={}, imageId={}", productId, imageId);
 
+		ProductImage image = productImageRepository.findById(imageId)
+			.orElseThrow(() -> {
+				log.warn("이미지 찾을 수 없음: imageId={}", imageId);
+				return new BusinessException(ErrorCode.IMAGE_NOT_FOUND, "이미지를 찾을 수 없거나 삭제된 상태입니다. id=" + imageId);
+			});
 		validateImageOwnership(productId, image);
 		image.setDeleted(true);
+		log.info("이미지 삭제(Soft Delete) 완료: imageId={}", imageId);
 	}
 
 	private void validateImageOwnership(Long productId, ProductImage image) {

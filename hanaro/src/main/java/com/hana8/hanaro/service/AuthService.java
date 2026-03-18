@@ -16,7 +16,9 @@ import com.hana8.hanaro.security.JwtUtil;
 import com.hana8.hanaro.security.exception.CustomJwtException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,6 +28,7 @@ public class AuthService {
 	private final JwtUtil jwtUtil;
 
 	public Map<String, Object> signIn(LoginRequest loginRequest) {
+		log.info("로그인 시도: email={}", loginRequest.email());
 		try {
 			Authentication authenticate = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
@@ -33,9 +36,10 @@ public class AuthService {
 					loginRequest.passwd()
 				)
 			);
-
+			log.info("로그인 성공: email={}", loginRequest.email());
 			return jwtUtil.authenticationToClaims(authenticate);
 		} catch (AuthenticationException e) {
+			log.warn("로그인 실패: email={}", loginRequest.email());
 			throw new BusinessException(ErrorCode.LOGIN_FAILED);
 		}
 	}

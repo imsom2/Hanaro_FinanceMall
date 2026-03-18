@@ -13,12 +13,15 @@ import com.hana8.hanaro.mapper.UserMapper;
 import com.hana8.hanaro.repository.AccountRepository;
 import com.hana8.hanaro.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -32,8 +35,9 @@ public class UserService {
 
 	@Transactional
 	public SignUpDTO signUp(SignUpRequestDTO dto) {
-
+		log.info("회원가입 시도: email={}", dto.getEmail());
 		if (userRepository.existsByEmail(dto.getEmail())) {
+			log.warn("이메일 중복: email={}", dto.getEmail());
 			throw new BusinessException(ErrorCode.USER_EMAIL_DUPLICATE);
 		}
 
@@ -64,6 +68,8 @@ public class UserService {
 			.build();
 
 		accountRepository.save(account);
+
+		log.info("회원가입 완료: email={}, accountNum={}", user.getEmail(), rawAccountNum);
 
 		SignUpDTO response = userMapper.toSignUpDTO(user);
 		response.setMaskedAccountNum(rawAccountNum);
