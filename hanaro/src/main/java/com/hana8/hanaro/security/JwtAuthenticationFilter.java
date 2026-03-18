@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,12 +66,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			Map<String, Object> claims = jwtUtil.validateToken(authHeader.substring(7));
 
+			Object idObj = claims.get("id");
+			Object emailObj = claims.get("email");
+			Object nameObj = claims.get("name");
+			Object roleObj = claims.get("role");
+
+			if (idObj == null || emailObj == null || nameObj == null || roleObj == null) {
+				sendError(response, ErrorCode.JWT_INVALID);
+				return;
+			}
+
 			UserDetailsDTO dto = new UserDetailsDTO(
-				Long.valueOf(claims.get("id").toString()),
-				(String) claims.get("email"),
+				Long.valueOf(idObj.toString()),
+				(String) emailObj,
 				"",
-				(String) claims.get("name"),
-				Role.valueOf((String) claims.get("role"))
+				(String) nameObj,
+				Role.valueOf((String) roleObj)
 			);
 
 			SecurityContextHolder.getContext().setAuthentication(

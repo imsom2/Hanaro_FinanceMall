@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "상품", description = "예적금 상품에 관련한 전체 API입니다")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
-@Tag(name = "상품", description = "예적금 상품에 관련한 API입니다")
 public class ProductController {
 
 	private final ProductService service;
@@ -47,7 +47,8 @@ public class ProductController {
 		return SuccessResponseDTO.of(SuccessCode._OK, data);
 	}
 
-	@Operation(summary = "상품 등록", description = "새 예적금 상품을 등록합니다.")
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 등록 ( 관리자 )", description = "새 예적금 상품을 등록합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "상품 등록 성공"),
 		@ApiResponse(responseCode = "400", description = "입력값 오류"),
@@ -60,7 +61,8 @@ public class ProductController {
 		return SuccessResponseDTO.of(SuccessCode.PRODUCT_CREATED, data);
 	}
 
-	@Operation(summary = "상품 수정", description = "기존 예적금 상품 정보를 수정합니다.")
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 수정 ( 관리자 )", description = "기존 예적금 상품 정보를 수정합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "상품 수정 성공"),
 		@ApiResponse(responseCode = "400", description = "입력값 오류"),
@@ -77,7 +79,8 @@ public class ProductController {
 		return SuccessResponseDTO.of(SuccessCode.PRODUCT_UPDATED, data);
 	}
 
-	@Operation(summary = "상품 삭제", description = "상품을 soft delete 처리합니다.")
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 삭제 ( 관리자 )", description = "상품을 soft delete 처리합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
 		@ApiResponse(responseCode = "404", description = "상품을 찾을 수 없음")

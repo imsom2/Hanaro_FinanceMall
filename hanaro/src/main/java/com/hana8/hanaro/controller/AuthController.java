@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.hana8.hanaro.common.exception.SuccessCode;
 import com.hana8.hanaro.common.exception.SuccessResponseDTO;
 import com.hana8.hanaro.dto.auth.LoginRequest;
+import com.hana8.hanaro.dto.auth.RefreshRequest;
 import com.hana8.hanaro.dto.auth.SignUpDTO;
 import com.hana8.hanaro.dto.auth.SignUpRequestDTO;
 import com.hana8.hanaro.service.AuthService;
@@ -62,9 +63,9 @@ public class AuthController {
 	@PostMapping("/refresh")
 	public SuccessResponseDTO<Map<String, Object>> refresh(
 		@RequestHeader("Authorization") String authHeader,
-		@RequestParam String refreshToken
+		@RequestBody RefreshRequest request
 	) {
-		Map<String, Object> response = authService.refresh(authHeader, refreshToken);
+		Map<String, Object> response = authService.refresh(authHeader, request.refreshToken());
 		return SuccessResponseDTO.of(SuccessCode.TOKEN_REFRESH_SUCCESS, response);
 	}
 }

@@ -137,7 +137,8 @@ public class ProductImageService {
 			}
 
 			try {
-				BufferedImage img = ImageIO.read(file.getInputStream());
+				byte[] bytes = file.getBytes();
+				BufferedImage img = ImageIO.read(new java.io.ByteArrayInputStream(bytes));
 				if (img == null) {
 					throw new BusinessException(ErrorCode.INVALID_FILE,
 						"유효하지 않은 이미지 파일입니다: " + file.getOriginalFilename());

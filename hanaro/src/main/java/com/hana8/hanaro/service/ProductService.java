@@ -40,7 +40,6 @@ public class ProductService {
 		Product product = repository.findByIdAndDeletedFalse(id)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
 				"상품이 존재하지 않습니다. id=" + id));
-		System.out.println("product = " + product);
 		return mapper.toDTO(product);
 	}
 

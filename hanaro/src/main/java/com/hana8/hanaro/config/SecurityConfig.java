@@ -38,13 +38,16 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) {
-		log.info(" --- securityConfig");
-		System.out.println("** SecurityConfig.filterChain");
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.cors(config -> config.configurationSource(corsConfigurationSource()))
 			.formLogin(AbstractHttpConfigurer::disable)
+			.httpBasic(AbstractHttpConfigurer::disable)
 			.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/api/auth/**", "/favicon.ico", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+				.anyRequest().authenticated()
+			)
 			.exceptionHandling(config -> config.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
@@ -62,7 +65,7 @@ public class SecurityConfig {
 
 	private CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOriginPatterns(List.of("*"));
+		config.setAllowedOriginPatterns(List.of("http://localhost:8080"));
 		config.setAllowedMethods(List.of(
 			HttpMethod.GET.name(),
 			HttpMethod.POST.name(),

@@ -1,11 +1,14 @@
 package com.hana8.hanaro.security;
 
+import com.hana8.hanaro.common.exception.ErrorCode;
 import com.hana8.hanaro.dto.auth.UserDetailsDTO;
 import com.hana8.hanaro.security.exception.CustomJwtException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -16,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -33,21 +37,22 @@ public class JwtUtil {
 				.parseSignedClaims(token)
 				.getPayload();
 		} catch (ExpiredJwtException e) {
-			throw new CustomJwtException("Token Expired");
+			log.warn("JWT Token Expired: {}", e.getMessage());
+			throw new CustomJwtException(ErrorCode.JWT_EXPIRED);
 		} catch (JwtException e) {
-			throw new CustomJwtException("Jwt Error");
+			log.error("Invalid JWT Token: {}", e.getMessage());
+			throw new CustomJwtException(ErrorCode.JWT_INVALID);
 		} catch (Exception e) {
-			throw new CustomJwtException("Error: " + e.getMessage());
-		}
+			log.error("Unexpected JWT Error: ", e);
+			throw new CustomJwtException(ErrorCode.INTERNAL_SERVER_ERROR, "토큰 처리 중 서버 오류가 발생했습니다: " + e.getMessage());		}
 	}
 
 	public Map<String, Object> authenticationToClaims(Authentication authentication) {
 		UserDetailsDTO dto = (UserDetailsDTO) authentication.getPrincipal();
 
 		if (dto == null) {
-			throw new CustomJwtException("Invalid Authentication");
+			throw new CustomJwtException(ErrorCode.JWT_INVALID);
 		}
-
 		Map<String, Object> claims = dto.getClaims();
 		Map<String, Object> tokenClaims = new java.util.HashMap<>(claims);
 		tokenClaims.put("accessToken", generateToken(claims, 10));

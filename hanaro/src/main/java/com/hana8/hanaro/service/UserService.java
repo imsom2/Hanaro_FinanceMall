@@ -28,6 +28,7 @@ public class UserService {
 	private final AccountRepository accountRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserMapper userMapper;
+	private final AccountUtil accountUtil;
 
 	@Transactional
 	public SignUpDTO signUp(SignUpRequestDTO dto) {
@@ -38,7 +39,7 @@ public class UserService {
 
 		String rawAccountNum;
 		if (dto.getAccountNum() != null && !dto.getAccountNum().isBlank()) {
-			String encryptedInput = AccountUtil.encrypt(dto.getAccountNum());
+			String encryptedInput = accountUtil.encrypt(dto.getAccountNum());
 			if (accountRepository.existsByAccountNum(encryptedInput)) {
 				throw new BusinessException(ErrorCode.ACCOUNT_NUM_DUPLICATE);
 			}
@@ -58,15 +59,15 @@ public class UserService {
 
 		Account account = Account.builder()
 			.user(user)
-			.accountNum(AccountUtil.encrypt(rawAccountNum))
+			.accountNum(accountUtil.encrypt(rawAccountNum))
 			.accountType(AccountType.BASIC)
 			.build();
 
 		accountRepository.save(account);
 
 		SignUpDTO response = userMapper.toSignUpDTO(user);
-
-		response.setAccountNum(AccountUtil.format(rawAccountNum));
+		String formatted = accountUtil.format(rawAccountNum);
+		response.setMaskedAccountNum(accountUtil.mask(formatted));
 		return response;
 	}
 
@@ -74,7 +75,7 @@ public class UserService {
 		int maxRetry = 10;
 		for (int i = 0; i < maxRetry; i++) {
 			String accountNum = generateAccountNum();
-			if (!accountRepository.existsByAccountNum(AccountUtil.encrypt(accountNum))) {
+			if (!accountRepository.existsByAccountNum(accountUtil.encrypt(accountNum))) {
 				return accountNum;
 			}
 		}

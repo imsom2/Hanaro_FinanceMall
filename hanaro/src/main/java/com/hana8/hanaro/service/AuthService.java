@@ -61,7 +61,8 @@ public class AuthService {
 		Map<String, Object> claim = jwtUtil.validateToken(refreshToken);
 
 		String newAccessToken = jwtUtil.generateToken(claim, 10);
-		String newRefreshToken = isSomeLeftTime((long) claim.get("exp"))
+		Number exp = (Number) claim.get("exp");
+		String newRefreshToken = (exp != null && isSomeLeftTime(exp.longValue()))
 			? jwtUtil.generateToken(claim, 60 * 24)
 			: refreshToken;
 
@@ -80,7 +81,7 @@ public class AuthService {
 		try {
 			jwtUtil.validateToken(accessToken);
 		} catch (CustomJwtException e) {
-			return true;
+			return e.getErrorCode() == ErrorCode.JWT_EXPIRED;
 		}
 		return false;
 	}

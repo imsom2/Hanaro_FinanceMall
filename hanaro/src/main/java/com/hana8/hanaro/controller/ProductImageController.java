@@ -22,15 +22,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "상품", description = "예적금 상품에 관련한 전체 API입니다")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products/{productId}/images")
-@Tag(name = "상품 이미지", description = "상품의 이미지에 관련한 API입니다")
 public class ProductImageController {
 
 	private final ProductImageService productImageService;
 
-	@Operation(summary = "상품 이미지 업로드", description = "한 개 이상의 상품 이미지를 한 번에 업로드합니다.")
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 이미지 업로드 ( 관리자 )", description = "한 개 이상의 상품 이미지를 한 번에 업로드합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "이미지 업로드 성공"),
 		@ApiResponse(responseCode = "400", description = "파일 형식 또는 크기 오류", content = @Content),
@@ -57,7 +58,8 @@ public class ProductImageController {
 		return productImageService.downloadImage(productId, imageId, inline);
 	}
 
-	@Operation(summary = "상품 이미지 삭제", description = "상품 이미지를 삭제합니다.")
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 이미지 삭제 ( 관리자 )", description = "상품 이미지를 삭제합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "이미지 삭제 성공"),
 		@ApiResponse(responseCode = "404", description = "이미지를 찾을 수 없음", content = @Content)

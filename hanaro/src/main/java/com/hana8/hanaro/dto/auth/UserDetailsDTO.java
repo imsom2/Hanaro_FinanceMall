@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = false)
 public class UserDetailsDTO extends User {
 
 	private final Long id;

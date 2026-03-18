@@ -12,6 +12,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hana8.hanaro.common.exception.ErrorCode;
+import com.hana8.hanaro.common.exception.ErrorResponseDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,14 +23,13 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 	@Override
 	public void handle(@NonNull HttpServletRequest request, HttpServletResponse response,
 		@NonNull AccessDeniedException accessDeniedException) throws IOException {
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		response.setStatus(HttpStatus.FORBIDDEN.value());
-
+		ErrorResponseDTO errorResponse = ErrorResponseDTO.of(ErrorCode.ACCESS_DENIED);
 		ObjectMapper objectMapper = new ObjectMapper();
-		PrintWriter pw = response.getWriter();
-		pw.println(objectMapper.writeValueAsString(
-			Map.of("error", "ERROR_ACCESS_DENIED")));
-		pw.close();
 
+		response.setStatus(ErrorCode.ACCESS_DENIED.getHttpStatus().value());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
 	}
 }
