@@ -8,8 +8,8 @@ build/
 *.bak
 
 logs
-ttt
-tmp
+upload
+secure
 
 db.properties
 *security.properties
@@ -45,4 +45,3 @@ out/
 
 ### VS Code ###
 .vscode/
-mysql/

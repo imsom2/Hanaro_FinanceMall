@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.hana8.hanaro.common.enums.Role;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +25,7 @@ import lombok.*;
 public class User extends BaseEntity {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(columnDefinition = "int unsigned")
+	@Tsid
 	private Long id;
 
 	@Column(nullable = false)

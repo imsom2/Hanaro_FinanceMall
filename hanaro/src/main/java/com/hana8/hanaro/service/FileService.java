@@ -1,5 +1,7 @@
 package com.hana8.hanaro.service;
 
+import com.hana8.hanaro.common.exception.BusinessException;
+import com.hana8.hanaro.common.exception.ErrorCode;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +17,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -26,7 +27,7 @@ public class FileService {
 
 	public String upload(MultipartFile file, String saveDir) {
 		if (file == null || file.isEmpty() || file.getOriginalFilename() == null) {
-			throw new IllegalArgumentException("파일이 비어있습니다.");
+			throw new BusinessException(ErrorCode.IMAGE_EMPTY);
 		}
 
 		String originalFilename = file.getOriginalFilename();
@@ -38,7 +39,7 @@ public class FileService {
 		Path thumbPath = basePath.resolve(Paths.get(saveDir, "thumb_" + savedFilename)).normalize();
 
 		if (!savePath.startsWith(basePath) || !thumbPath.startsWith(basePath)) {
-			throw new IllegalArgumentException("잘못된 파일 경로입니다.");
+			throw new BusinessException(ErrorCode.INVALID_FILE, "잘못된 파일 경로입니다.");
 		}
 
 		try {
@@ -54,7 +55,7 @@ public class FileService {
 					.toFile(thumbPath.toFile());
 			}
 		} catch (IOException e) {
-			throw new RuntimeException("파일 저장 실패", e);
+			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "파일 저장 실패: " + e.getMessage());
 		}
 
 		return savedFilename;
@@ -65,13 +66,12 @@ public class FileService {
 		Path filePath = basePath.resolve(Paths.get(saveDir, saveName)).normalize();
 
 		if (!filePath.startsWith(basePath)) {
-			throw new IllegalArgumentException("잘못된 파일 경로입니다.");
+			throw new BusinessException(ErrorCode.INVALID_FILE, "잘못된 파일 경로입니다.");
 		}
 
 		Resource resource = new FileSystemResource(filePath);
-
 		if (!resource.exists()) {
-			throw new NoSuchElementException("파일을 찾을 수 없습니다: " + saveName);
+			throw new BusinessException(ErrorCode.FILE_NOT_FOUND, "파일을 찾을 수 없습니다: " + saveName);
 		}
 
 		String contentType = "application/octet-stream";
@@ -80,7 +80,7 @@ public class FileService {
 			if (probed != null && !probed.isBlank()) {
 				contentType = probed;
 			}
-		} catch(IOException ignored){
+		} catch (IOException ignored) {
 		}
 
 		String disposition = (inline ? "inline" : "attachment")
@@ -97,11 +97,11 @@ public class FileService {
 		Path filePath = basePath.resolve(Paths.get(saveDir, saveName)).normalize();
 
 		if (!filePath.startsWith(basePath)) {
-			throw new IllegalArgumentException("잘못된 파일 경로입니다.");
+			throw new BusinessException(ErrorCode.INVALID_FILE, "잘못된 파일 경로입니다.");
 		}
 
 		if (!Files.exists(filePath)) {
-			throw new NoSuchElementException("파일을 찾을 수 없습니다: " + saveName);
+			throw new BusinessException(ErrorCode.FILE_NOT_FOUND, "파일을 찾을 수 없습니다: " + saveName);
 		}
 
 		try {
@@ -112,15 +112,13 @@ public class FileService {
 				Files.delete(thumbPath);
 			}
 		} catch (IOException e) {
-			throw new RuntimeException("파일 삭제 실패", e);
+			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "파일 삭제 실패: " + e.getMessage());
 		}
 	}
 
 	private String extractExtension(String originalFilename) {
 		int index = originalFilename.lastIndexOf(".");
-		if (index == -1) {
-			return "";
-		}
+		if (index == -1) return "";
 		return originalFilename.substring(index);
 	}
 }

@@ -1,58 +1,99 @@
 package com.hana8.hanaro.controller;
 
+import com.hana8.hanaro.common.exception.SuccessCode;
+import com.hana8.hanaro.common.exception.SuccessResponseDTO;
 import com.hana8.hanaro.dto.ProductDTO;
 import com.hana8.hanaro.dto.ProductListDTO;
-import com.hana8.hanaro.service.ProductImageService;
+import com.hana8.hanaro.dto.ProductRequestDTO;
+import com.hana8.hanaro.mapper.ProductMapper;
 import com.hana8.hanaro.service.ProductService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "상품", description = "예적금 상품에 관련한 전체 API입니다")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
-@Tag(name = "상품관리", description = "상품 상세에서는 ...")
 public class ProductController {
 
 	private final ProductService service;
-	private final ProductImageService productImageService;
+	private final ProductMapper mapper;
 
+	@Operation(summary = "상품 목록 조회", description = "삭제되지 않은 예적금 상품 목록을 조회합니다.")
+	@ApiResponse(responseCode = "200", description = "상품 목록 조회 성공")
 	@GetMapping
-	public List<ProductListDTO> getProducts() {
-		return service.getProducts();
+	public SuccessResponseDTO<List<ProductListDTO>> getProducts() {
+		List<ProductListDTO> data = service.getProducts();
+		return SuccessResponseDTO.of(SuccessCode._OK, data);
 	}
 
+	@Operation(summary = "상품 상세 조회", description = "상품 ID로 특정 상품의 상세 정보를 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "상품 상세 조회 성공"),
+		@ApiResponse(responseCode = "404", description = "상품을 찾을 수 없음")
+	})
 	@GetMapping("/{id}")
-	public ProductDTO getProduct(@PathVariable Long id) {
-		return service.getProduct(id);
+	public SuccessResponseDTO<ProductDTO> getProduct(@PathVariable Long id) {
+		ProductDTO data = service.getProduct(id);
+		return SuccessResponseDTO.of(SuccessCode._OK, data);
 	}
 
-	// 상품 등록
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 등록 ( 관리자 )", description = "새 예적금 상품을 등록합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "상품 등록 성공"),
+		@ApiResponse(responseCode = "400", description = "입력값 오류"),
+		@ApiResponse(responseCode = "409", description = "중복 데이터")
+	})
 	@PostMapping
-	public ProductDTO createProduct(@Validated(ProductDTO.OnCreate.class) @RequestBody ProductDTO dto) {
-		return service.createProduct(dto);
-	}
-
-	// 상품 수정
-	@PutMapping("/{id}")
-	public ProductDTO updateProduct(
-		@PathVariable Long id,
-		@Validated(ProductDTO.OnUpdate.class) @RequestBody ProductDTO dto
+	@PreAuthorize("hasRole('ADMIN')")
+	public SuccessResponseDTO<ProductDTO> createProduct(
+		@Validated(ProductRequestDTO.OnCreate.class) @RequestBody ProductRequestDTO requestDto
 	) {
-		dto.setId(id);
-		return service.updateProduct(id, dto);
+		ProductDTO dto = mapper.toDTO(requestDto);
+		ProductDTO data = service.createProduct(dto);
+		return SuccessResponseDTO.of(SuccessCode.PRODUCT_CREATED, data);
 	}
 
-	// 상품 삭제
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 수정 ( 관리자 )", description = "기존 예적금 상품 정보를 수정합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "상품 수정 성공"),
+		@ApiResponse(responseCode = "400", description = "입력값 오류"),
+		@ApiResponse(responseCode = "404", description = "상품을 찾을 수 없음")
+	})
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public SuccessResponseDTO<ProductDTO> updateProduct(
+		@PathVariable Long id,
+		@Validated(ProductRequestDTO.OnUpdate.class) @RequestBody ProductRequestDTO requestDto
+	) {
+		ProductDTO dto = mapper.toDTO(requestDto);
+		dto.setId(id);
+		ProductDTO data = service.updateProduct(id, dto);
+		return SuccessResponseDTO.of(SuccessCode.PRODUCT_UPDATED, data);
+	}
+
+	@Tag(name = "관리자 - 상품 운영", description = "상품을 관리하는 관리자용 API입니다")
+	@Operation(summary = "상품 삭제 ( 관리자 )", description = "상품을 soft delete 처리합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
+		@ApiResponse(responseCode = "404", description = "상품을 찾을 수 없음")
+	})
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+	@PreAuthorize("hasRole('ADMIN')")
+	public SuccessResponseDTO<Void> deleteProduct(@PathVariable Long id) {
 		service.deleteProduct(id);
-		return ResponseEntity.ok().build();
+		return SuccessResponseDTO.of(SuccessCode.PRODUCT_DELETED);
 	}
 }

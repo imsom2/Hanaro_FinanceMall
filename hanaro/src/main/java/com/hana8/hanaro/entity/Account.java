@@ -4,7 +4,9 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.hana8.hanaro.common.enums.AccountType;
+import com.hana8.hanaro.common.util.AccountNumConverter;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,11 +26,11 @@ import lombok.*;
 public class Account extends BaseEntity {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(columnDefinition = "int unsigned")
+	@Tsid
 	private Long id;
 
-	@Column(nullable = false, length = 11)
+	@Convert(converter = AccountNumConverter.class)
+	@Column(nullable = false, length = 255)
 	private String accountNum;
 
 	@Enumerated(EnumType.STRING)
@@ -42,7 +44,6 @@ public class Account extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(
 		name = "user", referencedColumnName = "id",
-		columnDefinition = "int unsigned",
 		foreignKey = @ForeignKey(name = "fk_Account_user")
 	)
 	@OnDelete(action = OnDeleteAction.CASCADE)
