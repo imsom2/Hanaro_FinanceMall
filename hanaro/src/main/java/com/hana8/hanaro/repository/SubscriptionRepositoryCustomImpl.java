@@ -1,25 +1,31 @@
 package com.hana8.hanaro.repository;
 
-import java.util.List;
+import static com.hana8.hanaro.entity.QSubscription.subscription;
 
+import java.util.List;
 import com.hana8.hanaro.common.enums.AccountStatus;
 import com.hana8.hanaro.entity.Subscription;
-
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.PersistenceContext;
 
-@RequiredArgsConstructor
 public class SubscriptionRepositoryCustomImpl implements SubscriptionRepositoryCustom {
 
-	private final EntityManager em;
+	@PersistenceContext
+	private EntityManager entityManager;
+
+	private JPAQueryFactory queryFactory() {
+		return new JPAQueryFactory(entityManager);
+	}
 
 	@Override
 	public List<Subscription> findAllByUserIdAndStatusIn(Long userId, List<AccountStatus> statuses) {
-		return em.createQuery(
-				"SELECT s FROM Subscription s WHERE s.user.id = :userId AND s.status IN :statuses",
-				Subscription.class)
-			.setParameter("userId", userId)
-			.setParameter("statuses", statuses)
-			.getResultList();
+		return queryFactory()
+			.selectFrom(subscription)
+			.where(
+				subscription.user.id.eq(userId),
+				subscription.status.in(statuses)
+			)
+			.fetch();
 	}
 }
