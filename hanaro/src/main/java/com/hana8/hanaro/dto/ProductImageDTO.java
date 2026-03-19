@@ -1,16 +1,26 @@
 package com.hana8.hanaro.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "상품 이미지 응답 DTO")
 public class ProductImageDTO {
+	@Schema(description = "이미지 ID", example = "10")
 	private Long id;
-	@NotBlank
+
+	@Schema(description = "원본 파일명", example = "banner.png")
 	private String orgName;
+
+	@Schema(description = "서버 저장 파일명", example = "uuid_banner.png")
 	private String saveName;
+
+	@Schema(description = "서버 저장 경로", example = "20211218")
 	private String saveDir;
-	private boolean deleted;
 }

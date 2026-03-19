@@ -9,8 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.hana8.hanaro.common.enums.ProductType;
 
@@ -18,7 +16,6 @@ import com.hana8.hanaro.common.enums.ProductType;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "상품 등록/수정 요청 DTO")
 public class ProductRequestDTO {
 
 	@Schema(description = "상품명", example = "하나로 외화 적금 (MZ)")
@@ -26,18 +23,18 @@ public class ProductRequestDTO {
 	@Size(max = 100, message = "상품명은 100자 이하여야 합니다.")
 	private String productName;
 
-	@Schema(description = "상품 종류", example = "SAVINGS")
-	@NotNull(message = "상품 종류는 필수입니다.")
+	@Schema(description = "상품 타입", allowableValues = {"DEPOSIT", "SAVINGS"})
+	@NotNull(  message = "상품 종류는 필수입니다.")
 	private ProductType productType;
 
-	@Schema(description = "최소 가입 금액", example = "10000")
-	@NotNull(message = "최소 금액은 필수입니다.")
-	@Positive(message = "최소 금액은 0보다 커야 합니다.")
+	@Schema(description = "최소 납입 금액", example = "10000")
+	@NotNull(message = "최소 납입 금액은 필수입니다.")
+	@Positive(message = "최소 납입 금액은 0보다 커야 합니다.")
 	private Long min;
 
-	@Schema(description = "최대 가입 금액", example = "5000000")
-	@NotNull(message = "최대 금액은 필수입니다.")
-	@Positive(message = "최대 금액은 0보다 커야 합니다.")
+	@Schema(description = "최대 납입 금액", example = "5000000")
+	@NotNull(message = "최대 납입 금액은 필수입니다.")
+	@Positive(message = "최대 납입 금액은 0보다 커야 합니다.")
 	private Long max;
 
 	@Schema(description = "가입 기간 (개월)", example = "12")
@@ -59,11 +56,8 @@ public class ProductRequestDTO {
 	@Size(max = 1000, message = "상품 설명은 1000자 이하여야 합니다.")
 	private String description;
 
-	@Builder.Default
-	private List<ProductImageDTO> images = new ArrayList<>();
-
 	@AssertTrue(message = "최소 금액은 최대 금액보다 클 수 없습니다.")
-	@Schema(hidden = true) // Swagger 문서 결과값에는 표시되지 않도록 설정
+	@Schema(hidden = true)
 	public boolean isValidAmountRange() {
 		if (min == null || max == null) return true;
 		return min <= max;

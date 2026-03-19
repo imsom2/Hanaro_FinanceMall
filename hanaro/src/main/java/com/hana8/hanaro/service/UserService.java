@@ -1,10 +1,10 @@
 package com.hana8.hanaro.service;
 
+import com.hana8.hanaro.common.converter.AccountUtil;
 import com.hana8.hanaro.common.enums.AccountType;
 import com.hana8.hanaro.common.enums.Role;
 import com.hana8.hanaro.common.exception.BusinessException;
 import com.hana8.hanaro.common.exception.ErrorCode;
-import com.hana8.hanaro.common.converter.AccountUtil;
 import com.hana8.hanaro.dto.auth.SignUpDTO;
 import com.hana8.hanaro.dto.auth.SignUpRequestDTO;
 import com.hana8.hanaro.entity.Account;
@@ -19,8 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,6 +29,7 @@ public class UserService {
 	private final AccountRepository accountRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserMapper userMapper;
+	private final AccountService accountService;
 
 	@Transactional
 	public SignUpDTO signUp(SignUpRequestDTO dto) {
@@ -40,15 +39,7 @@ public class UserService {
 			throw new BusinessException(ErrorCode.USER_EMAIL_DUPLICATE);
 		}
 
-		String accountNum;
-		if (dto.getAccountNum() != null && !dto.getAccountNum().isBlank()) {
-			if (accountRepository.existsByAccountNum(AccountUtil.encrypt(dto.getAccountNum()))) {
-				throw new BusinessException(ErrorCode.ACCOUNT_NUM_DUPLICATE);
-			}
-			accountNum = dto.getAccountNum();
-		} else {
-			accountNum = generateUniqueAccountNum();
-		}
+		String accountNum = accountService.resolveAccountNum(dto.getAccountNum());
 
 		User user = User.builder()
 			.email(dto.getEmail())
@@ -64,36 +55,14 @@ public class UserService {
 			.accountNum(accountNum)
 			.accountType(AccountType.BASIC)
 			.build();
-
 		accountRepository.save(account);
 
 		log.info("회원가입 완료: userId={}, accountId={}", user.getId(), account.getId());
 
 		SignUpDTO response = userMapper.toSignUpDTO(user);
-		response.setMaskedAccountNum(accountNum);
+		response.setAccountNum(AccountUtil.format(accountNum));
+		response.setAccountId(account.getId());
 		return response;
 	}
 
-	private String generateUniqueAccountNum() {
-		int maxRetry = 10;
-		for (int i = 0; i < maxRetry; i++) {
-			String accountNum = generateAccountNum();
-			if (!accountRepository.existsByAccountNum(AccountUtil.encrypt(accountNum))) {
-				return accountNum;
-			}
-		}
-		throw new BusinessException(
-			ErrorCode.INTERNAL_SERVER_ERROR,
-			"계좌번호 생성에 실패했습니다. 잠시 후 다시 시도해주세요."
-		);
-	}
-
-	private String generateAccountNum() {
-		Random random = new Random();
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 11; i++) {
-			sb.append(random.nextInt(10));
-		}
-		return sb.toString();
-	}
 }

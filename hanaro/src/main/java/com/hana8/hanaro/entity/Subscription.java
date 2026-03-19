@@ -1,6 +1,5 @@
 package com.hana8.hanaro.entity;
 
-import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,8 +11,8 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.hana8.hanaro.common.enums.AccountStatus;
 import com.hana8.hanaro.common.enums.PaymentCycle;
-import com.hana8.hanaro.common.enums.SubStatus;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -50,7 +49,7 @@ public class Subscription extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	@Builder.Default
-	private SubStatus status = SubStatus.ACTIVE;
+	private AccountStatus status = AccountStatus.ACTIVE;
 
 	@Column(precision = 15, scale = 2)
 	private BigDecimal maturityInterest;  // 만기 이자

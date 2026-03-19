@@ -2,7 +2,7 @@ package com.hana8.hanaro.service;
 
 import com.hana8.hanaro.common.exception.BusinessException;
 import com.hana8.hanaro.common.exception.ErrorCode;
-import com.hana8.hanaro.dto.ProductDTO;
+import com.hana8.hanaro.dto.ProductDetailDTO;
 import com.hana8.hanaro.dto.ProductListDTO;
 import com.hana8.hanaro.entity.Product;
 import com.hana8.hanaro.mapper.ProductMapper;
@@ -24,7 +24,6 @@ public class ProductService {
 	private final ProductRepository repository;
 	private final ProductMapper mapper;
 
-	// 상품 목록 조회
 	public List<ProductListDTO> getProducts() {
 		return repository.findByDeletedFalse()
 			.stream()
@@ -39,32 +38,31 @@ public class ProductService {
 			.toList();
 	}
 
-	// 상품 상세 조회
-	public ProductDTO getProduct(Long id) {
+	public ProductDetailDTO getProduct(Long id) {
 		Product product = repository.findByIdAndDeletedFalse(id)
-			.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND,
-				"상품이 존재하지 않습니다. id=" + id));
-		ProductDTO dto = mapper.toDTO(product);
-		if (dto.getImages() != null) {
-			dto.setImages(dto.getImages().stream()
+			.orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "상품이 존재하지 않습니다. id=" + id));
+
+		ProductDetailDTO dto = mapper.toDTO(product);
+		dto.setImages(
+			product.getImages().stream()
 				.filter(img -> !img.isDeleted())
-				.toList());
-		}
+				.map(mapper::toImageDTO)
+				.toList()
+		);
+
 		return dto;
 	}
 
-	// 상품 등록
 	@Transactional
-	public ProductDTO createProduct(ProductDTO dto) {
+	public ProductDetailDTO createProduct(ProductDetailDTO dto) {
 		log.info("새로운 상품 등록 시도: name={}", dto.getProductName());
 		Product product = repository.save(mapper.toEntity(dto));
 		log.info("상품 등록 완료: ID={}, name={}", product.getId(), product.getProductName());
 		return mapper.toDTO(product);
 	}
 
-	// 상품 수정
 	@Transactional
-	public ProductDTO updateProduct(Long id, ProductDTO dto) {
+	public ProductDetailDTO updateProduct(Long id, ProductDetailDTO dto) {
 		log.info("상품 수정 시도: ID={}, targetName={}", id, dto.getProductName());
 		Product product = repository.findByIdAndDeletedFalse(id)
 			.orElseThrow(() -> {
@@ -84,7 +82,6 @@ public class ProductService {
 		return mapper.toDTO(product);
 	}
 
-	// 상품 삭제 (soft delete)
 	@Transactional
 	public void deleteProduct(Long id) {
 		log.info("상품 삭제 시도: ID={}", id);

@@ -1,6 +1,6 @@
 package com.hana8.hanaro.mapper;
 
-import com.hana8.hanaro.dto.ProductDTO;
+import com.hana8.hanaro.dto.ProductDetailDTO;
 import com.hana8.hanaro.dto.ProductImageDTO;
 import com.hana8.hanaro.dto.ProductListDTO;
 import com.hana8.hanaro.dto.ProductRequestDTO;
@@ -13,24 +13,16 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
-	ProductDTO toDTO(ProductRequestDTO requestDto);
+	ProductDetailDTO toDTO(ProductRequestDTO requestDto);
 
-	ProductDTO toDTO(Product product);
-
-	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "images", ignore = true)
-	Product toEntity(ProductDTO dto);
+	ProductDetailDTO toDTO(Product product);
 
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "images", ignore = true)
-	Product toEntity(ProductRequestDTO dto);
-
-	List<ProductDTO> toDTOList(List<Product> products);
+	Product toEntity(ProductDetailDTO dto);
 
 	@Mapping(target = "thumbImage", ignore = true)
 	ProductListDTO toListDTO(Product product);
-
-	List<ProductListDTO> toListDTOList(List<Product> products);
 
 	ProductImageDTO toImageDTO(ProductImage image);
 

@@ -64,6 +64,14 @@
         <appender-ref ref="SERVICE_FILE" />
         <appender-ref ref="CONSOLE" />
     </logger>
+    <logger name="com.hana8.hanaro.service.AccountService" level="INFO" additivity="false">
+        <appender-ref ref="SERVICE_FILE" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    <logger name="com.hana8.hanaro.service.UserAdminService" level="INFO" additivity="false">
+        <appender-ref ref="SERVICE_FILE" />
+        <appender-ref ref="CONSOLE" />
+    </logger>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

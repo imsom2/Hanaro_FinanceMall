@@ -21,6 +21,7 @@ public class UserDetailsDTO extends User {
 	private final String email;
 	private final String name;
 	private final Role role;
+	private Long accountId;
 
 	public UserDetailsDTO(Long id, String email, String passwd, String name, Role role) {
 		super(email, passwd, List.of(new SimpleGrantedAuthority(role.name())));
@@ -36,6 +37,8 @@ public class UserDetailsDTO extends User {
 		map.put("email", email);
 		map.put("name", name);
 		map.put("role", role.name());
+		map.put("accountId", accountId != null ? String.valueOf(accountId) : null);
+
 		return map;
 	}
 }

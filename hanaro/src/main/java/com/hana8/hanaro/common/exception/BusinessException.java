@@ -11,8 +11,7 @@ public class BusinessException extends RuntimeException {
 		super(errorCode.getMessage());
 		this.errorCode = errorCode;
 	}
-
-	// 메시지를 직접 지정하고 싶을 때
+	
 	public BusinessException(ErrorCode errorCode, String message) {
 		super(message);
 		this.errorCode = errorCode;
