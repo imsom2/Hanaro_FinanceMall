@@ -21,6 +21,15 @@ public enum SuccessCode {
 	PRODUCT_UPDATED(HttpStatus.OK, "PRODUCT201", "상품 수정이 완료되었습니다."),
 	PRODUCT_DELETED(HttpStatus.OK, "PRODUCT202", "상품이 삭제되었습니다."),
 
+	// 상품 가입 관련
+	SUBSCRIPTION_SUCCESS(HttpStatus.CREATED, "SUB200", "상품에 가입되었습니다."),
+	SUBSCRIPTION_CANCELLED(HttpStatus.OK, "SUB201", "상품이 해지되었습니다."),
+	TRANSFER_SUCCESS(HttpStatus.OK, "SUB202", "납입이 완료되었습니다."),
+	SUBSCRIPTION_MATURED(HttpStatus.OK, "SUB203", "만기 처리가 완료되었습니다."),
+
+	// 계좌 관련
+	DEPOSIT_SUCCESS(HttpStatus.OK, "ACCOUNT200", "충전이 완료되었습니다."),
+
 	// 이미지 관련
 	IMAGE_UPLOADED(HttpStatus.OK, "IMAGE200", "이미지 업로드가 완료되었습니다."),
 	IMAGE_DELETED(HttpStatus.OK, "IMAGE201", "이미지가 삭제되었습니다.");

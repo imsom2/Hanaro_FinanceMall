@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "회원가입 요청 DTO")
 public class SignUpRequestDTO {
 
 	@NotBlank(message = "이메일은 필수입니다.")
@@ -38,6 +39,6 @@ public class SignUpRequestDTO {
 	private String name;
 
 	@AccountNumber
-	@Schema(description = "계좌번호", example = "01023125186")
+	@Schema(description = "희망 계좌번호 11자리 숫자 (미입력 시 자동 생성)", example = "11012345678")
 	private String accountNum;
 }

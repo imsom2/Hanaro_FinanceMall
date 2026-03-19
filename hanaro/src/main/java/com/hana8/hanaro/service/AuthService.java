@@ -28,7 +28,7 @@ public class AuthService {
 	private final JwtUtil jwtUtil;
 
 	public Map<String, Object> signIn(LoginRequest loginRequest) {
-		log.info("로그인 시도");
+		log.info("로그인 시도: email={}", maskEmail(loginRequest.email()));
 		try {
 			Authentication authenticate = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
@@ -65,7 +65,7 @@ public class AuthService {
 
 		String newAccessToken = jwtUtil.generateToken(claim, 10);
 		Number exp = (Number) claim.get("exp");
-		String newRefreshToken = (exp != null && isSomeLeftTime(exp.longValue()))
+		String newRefreshToken = (exp != null && isRefreshTokenNearExpiry(exp.longValue()))
 			? jwtUtil.generateToken(claim, 60 * 24)
 			: refreshToken;
 
@@ -75,7 +75,7 @@ public class AuthService {
 		);
 	}
 
-	private boolean isSomeLeftTime(long exp) {
+	private boolean isRefreshTokenNearExpiry(long exp) {
 		long nowSec = System.currentTimeMillis() / 1000;
 		return (exp - nowSec) < 60 * 60;
 	}
@@ -87,5 +87,11 @@ public class AuthService {
 			return e.getErrorCode() == ErrorCode.JWT_EXPIRED;
 		}
 		return false;
+	}
+
+	private String maskEmail(String email) {
+		int atIndex = email.indexOf("@");
+		if (atIndex <= 1) return email;
+		return email.charAt(0) + "***" + email.substring(atIndex);
 	}
 }

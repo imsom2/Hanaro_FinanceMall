@@ -3,7 +3,6 @@ package com.hana8.hanaro.controller;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.hana8.hanaro.common.exception.SuccessCode;
@@ -20,18 +19,20 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "인증/인가", description = "인증/인가에 관련한 API입니다")
+@Tag(name = "공통 - 인증/인가", description = "인증/인가에 관련한 API입니다")
 public class AuthController {
 
 	private final UserService userService;
 	private final AuthService authService;
 
-	@Operation(summary = "회원가입", description = "회원가입과 동시에 기본 입출금 계좌가 생성됩니다.")
+	@Operation(summary = "회원가입",
+		description = "회원가입과 동시에 기본 입출금 계좌가 생성됩니다.\n\n계좌번호를 입력하지 않으면 랜덤으로 생성합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "201", description = "회원가입 성공"),
 		@ApiResponse(responseCode = "400", description = "입력값 오류", content = @Content),
@@ -39,23 +40,25 @@ public class AuthController {
 	})
 	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
-	public SuccessResponseDTO<SignUpDTO> signUp(@Validated @RequestBody SignUpRequestDTO dto) {
+	public SuccessResponseDTO<SignUpDTO> signUp(@Valid @RequestBody SignUpRequestDTO dto) {
 		SignUpDTO response = userService.signUp(dto);
 		return SuccessResponseDTO.of(SuccessCode.SIGNUP_SUCCESS, response);
 	}
 
-	@Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하고 accessToken / refreshToken 정보를 반환합니다.")
+	@Operation(summary = "로그인",
+		description = "이메일과 비밀번호로 로그인하고 accessToken / refreshToken 정보를 반환합니다.\n\n관리자 계정 : hanaro@hanaro.com / 12345678")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "로그인 성공"),
 		@ApiResponse(responseCode = "401", description = "로그인 실패", content = @Content)
 	})
 	@PostMapping("/signin")
-	public SuccessResponseDTO<Map<String, Object>> signIn(@RequestBody @Validated LoginRequest loginRequest) {
+	public SuccessResponseDTO<Map<String, Object>> signIn(@RequestBody @Valid LoginRequest loginRequest) {
 		Map<String, Object> response = authService.signIn(loginRequest);
 		return SuccessResponseDTO.of(SuccessCode.SIGNIN_SUCCESS, response);
 	}
 
-	@Operation(summary = "토큰 재발급", description = "Authorization 헤더의 access token과 refreshToken을 이용해 access token을 재발급합니다.")
+	@Operation(summary = "토큰 재발급",
+		description = "Authorization 헤더에 'Bearer {accessToken}' 형식으로 입력해주세요.\n\nrefreshToken을 이용해 access token을 재발급합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "토큰 재발급 성공"),
 		@ApiResponse(responseCode = "401", description = "유효하지 않거나 만료된 토큰", content = @Content)
@@ -63,7 +66,7 @@ public class AuthController {
 	@PostMapping("/refresh")
 	public SuccessResponseDTO<Map<String, Object>> refresh(
 		@RequestHeader("Authorization") String authHeader,
-		@RequestBody RefreshRequest request
+		@RequestBody @Valid RefreshRequest request
 	) {
 		Map<String, Object> response = authService.refresh(authHeader, request.refreshToken());
 		return SuccessResponseDTO.of(SuccessCode.TOKEN_REFRESH_SUCCESS, response);

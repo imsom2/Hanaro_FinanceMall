@@ -7,8 +7,8 @@ public class AccountNumberValidator implements ConstraintValidator<AccountNumber
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		if (value == null) {
-			return false;
+		if (value == null || value.isBlank()) {
+			return true;
 		}
 		return value.matches("^\\d{11}$");
 	}

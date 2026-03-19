@@ -14,6 +14,7 @@ public enum ErrorCode {
 	FILE_NOT_FOUND(HttpStatus.NOT_FOUND,            "COMMON_003", "파일을 찾을 수 없습니다."),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_004", "서버 오류가 발생했습니다."),
 	DATABASE_ERROR(HttpStatus.CONFLICT,             "COMMON_005", "데이터 처리 중 충돌이 발생했습니다."),
+	ENDPOINT_NOT_FOUND(HttpStatus.NOT_FOUND,        "COMMON_006", "요청한 경로를 찾을 수 없습니다."),
 
 	// ── Auth ─────────────────────────────────────────────────────
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED,           "AUTH_001", "로그인이 필요합니다."),

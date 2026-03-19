@@ -3,16 +3,10 @@ package com.hana8.hanaro.common.converter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import java.security.SecureRandom;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
-
-import com.hana8.hanaro.common.exception.BusinessException;
-import com.hana8.hanaro.common.exception.ErrorCode;
 
 @Component
 public class AccountUtil {
@@ -48,14 +42,14 @@ public class AccountUtil {
 			byte[] decoded = Base64.getDecoder().decode(encrypted);
 			return new String(cipher.doFinal(decoded), StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			return encrypted;
+			throw new RuntimeException("복호화 오류", e);
 		}
 	}
 
-	public static String mask(String raw) {
-		if (raw == null || raw.length() < 11) return raw;
-		String clean = raw.replaceAll("[\\s-]", "");
-		String masked = clean.substring(0, 3) + "****" + clean.substring(7);
-		return masked.replaceFirst("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
+	public static String format(String rawAccountNum) {
+		if (rawAccountNum == null || rawAccountNum.length() != 11) return rawAccountNum;
+		return rawAccountNum.substring(0, 3) + "-" +
+			rawAccountNum.substring(3, 7) + "-" +
+			rawAccountNum.substring(7);
 	}
 }

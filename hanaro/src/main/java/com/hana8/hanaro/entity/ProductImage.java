@@ -1,8 +1,5 @@
 package com.hana8.hanaro.entity;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import jakarta.persistence.*;
 import lombok.*;
 

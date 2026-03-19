@@ -28,7 +28,7 @@ public class Product extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private ProductType productType;
+	private ProductType productType; // 예금 or 적금
 
 	@Column(nullable = false, columnDefinition = "int unsigned")
 	private Long min;  // 최저 납입금액

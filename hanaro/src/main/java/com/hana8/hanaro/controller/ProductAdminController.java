@@ -1,0 +1,70 @@
+package com.hana8.hanaro.controller;
+
+import com.hana8.hanaro.common.exception.SuccessCode;
+import com.hana8.hanaro.common.exception.SuccessResponseDTO;
+import com.hana8.hanaro.dto.ProductDetailDTO;
+import com.hana8.hanaro.dto.ProductRequestDTO;
+import com.hana8.hanaro.mapper.ProductMapper;
+import com.hana8.hanaro.service.ProductService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/admin/products")
+@Tag(name = "관리자 - 상품 관리", description = "상품을 관리하는 관리자용 API입니다")
+public class ProductAdminController {
+
+	private final ProductService service;
+	private final ProductMapper mapper;
+
+	@Operation(summary = "상품 등록", description = "새 예적금 상품을 등록합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "상품 등록 성공"),
+		@ApiResponse(responseCode = "400", description = "입력값 오류"),
+		@ApiResponse(responseCode = "409", description = "중복 데이터")
+	})
+	@PostMapping
+	public SuccessResponseDTO<ProductDetailDTO> createProduct(
+		@Validated(ProductRequestDTO.OnCreate.class) @RequestBody ProductRequestDTO requestDto
+	) {
+		ProductDetailDTO dto = mapper.toDTO(requestDto);
+		ProductDetailDTO data = service.createProduct(dto);
+		return SuccessResponseDTO.of(SuccessCode.PRODUCT_CREATED, data);
+	}
+
+	@Operation(summary = "상품 수정", description = "기존 예적금 상품 정보를 수정합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "상품 수정 성공"),
+		@ApiResponse(responseCode = "400", description = "입력값 오류"),
+		@ApiResponse(responseCode = "404", description = "상품을 찾을 수 없음")
+	})
+	@PutMapping("/{productId}")
+	public SuccessResponseDTO<ProductDetailDTO> updateProduct(
+		@PathVariable Long productId,
+		@Validated(ProductRequestDTO.OnUpdate.class) @RequestBody ProductRequestDTO requestDto
+	) {
+		ProductDetailDTO dto = mapper.toDTO(requestDto);
+		dto.setId(productId);
+		ProductDetailDTO data = service.updateProduct(productId, dto);
+		return SuccessResponseDTO.of(SuccessCode.PRODUCT_UPDATED, data);
+	}
+
+	@Operation(summary = "상품 삭제", description = "상품을 비활성화 처리합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "상품 삭제 성공"),
+		@ApiResponse(responseCode = "404", description = "상품을 찾을 수 없음")
+	})
+	@DeleteMapping("/{productId}")
+	public SuccessResponseDTO<Void> deleteProduct(@PathVariable Long productId) {
+		service.deleteProduct(productId);
+		return SuccessResponseDTO.of(SuccessCode.PRODUCT_DELETED);
+	}
+}
